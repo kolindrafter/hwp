@@ -246,6 +246,16 @@ def startCommand(update: Update, context: CallbackContext):
     buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
     context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text=start_message)
 
+def createPayment(label, sum):
+    payment = Quickpay(
+            receiver="4100117805460248",
+            quickpay_form="donate",
+            targets="Sponsor this project",
+            paymentType="SB",
+            sum=sum,
+            label=label)
+    return payment
+
 def messageHandler(update: Update, context: CallbackContext):
     global session_list_dic
     global admin_cids
@@ -300,33 +310,9 @@ def queryHandler(update: Update, context: CallbackContext):
                                           f"* <b>важно:</b> после успешного перевода вернитесь в чат бота и нажмите кнопку <b>Подтвердить</b>. Так мы сможем отследить Ваш донат и прислать ссылку для подключения. Обычно это занимает несколько минут\n" \
                                           f"* если все прошло хорошо, Вы автоматически получите ссылку для подключения через бот. Если Вы не получили ссылку или получили сообщение об ошибке, свяжитесь с @kolin_drafter, мы проверим перевод вручную."
 
-            RUR_100 = Quickpay(
-            receiver="4100117805460248",
-            quickpay_form="donate",
-            targets="Sponsor this project",
-            paymentType="SB",
-            sum=10,
-            label=label)
-
-            RUR_500 = Quickpay(
-                    receiver="4100117805460248",
-                    quickpay_form="donate",
-                    targets="Sponsor this project",
-                    paymentType="SB",
-                    sum=500,
-                    label=label)
-
-            RUR_1000 = Quickpay(
-                    receiver="4100117805460248",
-                    quickpay_form="donate",
-                    targets="Sponsor this project",
-                    paymentType="SB",
-                    sum=1000,
-                    label=label)
-
-            buttons = [[InlineKeyboardButton("RUB 100", callback_data="rub100", url=RUR_100.redirected_url)],
-                       [InlineKeyboardButton("RUB 500", callback_data="rub500", url=RUR_500.redirected_url)],
-                       [InlineKeyboardButton("RUB 1000", callback_data="rub1000", url=RUR_1000.redirected_url)],
+            buttons = [[InlineKeyboardButton("RUB 100", callback_data="rub100", url=createPayment(label,10).redirected_url)],
+                       [InlineKeyboardButton("RUB 500", callback_data="rub500", url=createPayment(label,10).redirected_url)],
+                       [InlineKeyboardButton("RUB 1000", callback_data="rub1000", url=createPayment(label,10).redirected_url)],
                        [InlineKeyboardButton("Подтвердить", callback_data="confirmPayment_"+query)],
                        [InlineKeyboardButton("Список групп", callback_data="groupList")]]
             context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
@@ -389,37 +375,13 @@ def queryHandler(update: Update, context: CallbackContext):
             for cid in admin_cids:
                 context.bot.send_message(chat_id=cid, text=message_to_admin+f"\nВремя платежа: {operation.datetime}\nВ группе осталось <b>{session_list_dic[groupName]['limit']}</b> мест.", parse_mode='html')
 
-    elif call.data == "just_donation":
+    elif query == "just_donation":
         label = 'justdonate'+'_'+str(update.effective_chat.id)
         thank_you_message = f"Вы решили поддержать наш проект. Мы благодарны Вам. Выберите сумму, которую Вы хотели бы пожертвовать:"
 
-        RUR_100 = Quickpay(
-            receiver="4100117805460248",
-            quickpay_form="donate",
-            targets="Sponsor this project",
-            paymentType="SB",
-            sum=10,
-            label=label)
-
-        RUR_500 = Quickpay(
-                receiver="4100117805460248",
-                quickpay_form="donate",
-                targets="Sponsor this project",
-                paymentType="SB",
-                sum=500,
-                label=label)
-
-        RUR_1000 = Quickpay(
-                receiver="4100117805460248",
-                quickpay_form="donate",
-                targets="Sponsor this project",
-                paymentType="SB",
-                sum=1000,
-                label=label)
-
-        buttons = [[InlineKeyboardButton("RUB 100", callback_data="rub100", url=RUR_100.redirected_url)],
-                       [InlineKeyboardButton("RUB 500", callback_data="rub500", url=RUR_500.redirected_url)],
-                       [InlineKeyboardButton("RUB 1000", callback_data="rub1000", url=RUR_1000.redirected_url)],
+        buttons = [[InlineKeyboardButton("RUB 100", callback_data="rub100", url=createPayment(label,10).redirected_url)],
+                       [InlineKeyboardButton("RUB 500", callback_data="rub500", url=createPayment(label,500).redirected_url)],
+                       [InlineKeyboardButton("RUB 1000", callback_data="rub1000", url=createPayment(label,1000).redirected_url)],
                        [InlineKeyboardButton("Список групп", callback_data="groupList")]]
         context.bot.send_message(chat_id=update.effective_chat.id, text=thank_you_message, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
 
