@@ -205,6 +205,18 @@ session_list_dic = {
          'limit':15,
          'members':{},
          'queue':{}},
+    'violence':
+        {'name':"Группа для жертв домашнего насилия",
+         'date_time':"по пятницам, 18:00 МСК.",
+         'reminder':"4_18:00",
+         'specialist':"",
+         'picture':"NULL",
+         'description':"",
+         'invite':f"Meeting ID: 875 2695 0985 | Passcode: 531846 | <a href='https://us02web.zoom.us/j/87526950985?pwd=MzJHbFArY0JEdXYyZ3ppckJ4TDI3QT09'>Zoom</a>",
+         'opengroup':"2",
+         'limit':15,
+         'members':{},
+         'queue':{}},
     'crisis':
         {'name':"Краткосрочная терапия",
          'date_time':"в удобное для Вас время по договоренности с терапевтом.",
@@ -408,7 +420,7 @@ session_list_dic_original = {
          'queue':{}}
 }
 
-admin_cids = [5358195597]
+admin_cids = [5358195597, 2071212062]
 user_cids = {}
 blacklist = {}
 
@@ -620,6 +632,13 @@ def queryHandler(update: Update, context: CallbackContext):
                 buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
                 context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
 
+            elif((session_item['opengroup'] == "2") & (update.effective_chat.id in session_item['members'].keys())):
+                context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html')
+                session_info = f"Вы уже записаны в эту группу. Будем ждать Вас {session_item['date_time']}.\n\nСсылка для подключения: {session_item['invite']}"
+                buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
+                context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
+
+
             elif((session_item['opengroup'] == "2") & (session_item['limit'] > 0) & (not update.effective_chat.id in session_item['members'].keys())):
                 context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html')
                 session_info = f"\n\nЭто <b>закрытая группа</b> с ограниченым количеством участников (осталось <b>{session_item['limit']}</b> мест). Записаться можно отправив любую предложенную сумму в качестве пожертвования.\n\n" \
@@ -631,8 +650,7 @@ def queryHandler(update: Update, context: CallbackContext):
                               f"* если пришло сообщение об ошибке - нажмите \"Подтвердить\" через некоторое время, возможна задержка на стороне Яндекс.Кошелька" \
                               f"Если Вы не получили ссылку или получили сообщение об ошибке вновь, свяжитесь с @kolin_drafter, мы проверим перевод вручную."
 
-                buttons = [[InlineKeyboardButton("RUB 100", callback_data="rub100", url=createPayment(label,100).redirected_url)],
-                           [InlineKeyboardButton("RUB 200", callback_data="rub200", url=createPayment(label,200).redirected_url)],
+                buttons = [[InlineKeyboardButton("RUB 200", callback_data="rub200", url=createPayment(label,200).redirected_url)],
                            [InlineKeyboardButton("RUB 300", callback_data="rub300", url=createPayment(label,300).redirected_url)],
                            [InlineKeyboardButton("RUB 500", callback_data="rub500", url=createPayment(label,500).redirected_url)],
                            [InlineKeyboardButton("RUB 1000", callback_data="rub1000", url=createPayment(label,1000).redirected_url)],
@@ -646,12 +664,6 @@ def queryHandler(update: Update, context: CallbackContext):
                 session_info = f"\n\nК сожалению, набор в это группу закрыт. Если в группе появятся места - мы пришлем уведомление."
                 session_list_dic[query]['queue'][update.effective_chat.id] = {}
                 session_list_dic[query]['queue'][update.effective_chat.id] = {'first_name':update.effective_chat.first_name,'last_name':update.effective_chat.last_name,'user_name':update.effective_chat.username}
-                buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
-                context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
-
-            elif((session_item['opengroup'] == "2") & (update.effective_chat.id in session_item['members'].keys())):
-                context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html')
-                session_info = f"Вы уже записаны в эту группу. Будем ждать Вас {session_item['date_time']}.\n\nСсылка для подключения: {session_item['invite']}"
                 buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
                 context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
 
@@ -716,8 +728,7 @@ def queryHandler(update: Update, context: CallbackContext):
             label = 'justdonate'+'_'+str(update.effective_chat.id)
             thank_you_message = f"Вы решили поддержать наш проект. Мы благодарны Вам."
             context.bot.send_message(chat_id=update.effective_chat.id, text=thank_you_message, parse_mode='html')
-            buttons = [[InlineKeyboardButton("RUB 100", callback_data="rub100", url=createPayment(label,100).redirected_url)],
-               [InlineKeyboardButton("RUB 200", callback_data="rub200", url=createPayment(label,200).redirected_url)],
+            buttons = [[InlineKeyboardButton("RUB 200", callback_data="rub200", url=createPayment(label,200).redirected_url)],
                [InlineKeyboardButton("RUB 300", callback_data="rub300", url=createPayment(label,300).redirected_url)],
                [InlineKeyboardButton("RUB 500", callback_data="rub500", url=createPayment(label,500).redirected_url)],
                [InlineKeyboardButton("RUB 1000", callback_data="rub1000", url=createPayment(label,1000).redirected_url)],
