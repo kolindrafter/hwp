@@ -420,6 +420,7 @@ def start(update: Update, context: CallbackContext):
     buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
     context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text=start_message)
     if not update.effective_chat.id in user_cids.keys():
+        context.bot.send_message(chat_id=update.effective_chat.id, text="asdf")
         user_cids[update.effective_chat.id]['first_name'] = update.effective_chat.first_name
         user_cids[update.effective_chat.id]['last_name'] = update.effective_chat.last_name
         user_cids[update.effective_chat.id]['user_name'] = update.effective_chat.username
