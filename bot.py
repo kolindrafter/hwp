@@ -263,7 +263,7 @@ def queryHandler(update: Update, context: CallbackContext):
         label = str(query)+'_'+str(update.effective_chat.id)
 
         if query == "crisis":
-            session_list_dic['crisis']['members'][update.effective_chat.id] = {'chat_id':update.effective_chat.id,'first_name':update.message.chat.first_name,'last_name':update.message.chat.last_name,'user_name':update.message.chat.username}
+            session_list_dic['crisis']['members'][update.effective_chat.id] = {'chat_id':update.effective_chat.id,'first_name':update.effective_chat.first_name,'last_name':update.effective_chat.last_name,'user_name':update.effective_chat.username}
             context.bot.send_message(chat_id=update.effective_chat.id, text="Опишите свою проблему в одном сообщении. Это поможет нам подобрать терапевта для Вас.", parse_mode='html')
 
         elif(session_item['opengroup'] == "1"):
