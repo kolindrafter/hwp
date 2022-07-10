@@ -505,7 +505,7 @@ def messageHandler(update: Update, context: CallbackContext):
         context.bot.send_message(cid, msg)
     if ("viewgroupinfo" in msg) & (cid in admin_cids):
         for key in session_list_dic.keys():
-            session_item = session_list_dic[groupName]
+            session_item = session_list_dic[key]
             msg = f"Name: {session_item['name']}\n" \
                  f"Date: {session_item['date_time']}\n" \
                  f"Reminder: {session_item['reminder']}\n" \
