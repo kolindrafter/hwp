@@ -39,8 +39,9 @@ session_list_dic = {
          'picture':"NULL",
          'description':"Продолжительность - 10 недель",
          'invite': f"Meeting ID: 230 365 3201 | Passcode: gaXp8U | <a href='https://us05web.zoom.us/j/2303653201?pwd=WWJ1a3ZoblVFWTJIRHh4cGt6K0ppdz09'>Zoom</a>",
-         'opengroup':"0",
-         'limit':15,
+         'opengroup':"2",
+         'limit':0,
+         # 'limit':15,
          'members':{},
          'queue':{}},
     'volunteertraining':
@@ -288,43 +289,45 @@ def queryHandler(update: Update, context: CallbackContext):
             buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
             context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
 
-        # elif((session_item['opengroup'] == "2") & (session_item['limit'] > 0) & (not call.message.chat.id in session_item['members'].keys())):
-        #     session_info = session_info + f"\n\n<b>Ссылка для подключения:</b>\n{session_item['invite']}"
-        #     bot.send_message(call.message.chat.id, session_info, parse_mode='html', reply_markup=view_session_list())
-        #     session_list_dic[call.data]['members'][call.message.chat.id] = {'first_name':call.message.chat.first_name,'last_name':call.message.chat.last_name,'user_name':call.message.chat.username}
-        #     session_list_dic[call.data]['limit'] -= 1
-        #
-        # elif((session_item['opengroup'] == "2") & (session_item['limit'] <= 0) & (not call.message.chat.id in session_item['members'].keys())):
-        #     session_info = session_info + f"\n\nК сожалению, набор в это группу закрыт. Если в группе появятся места - мы пришлем уведомление."
-        #     session_list_dic[call.data]['queue'][call.message.chat.id] = {'first_name':call.message.chat.first_name,'last_name':call.message.chat.last_name,'user_name':call.message.chat.username}
-        #     bot.send_message(call.message.chat.id, session_info, parse_mode='html', reply_markup=view_session_list())
-        #
-        # elif((session_item['opengroup'] == "2") & (call.message.chat.id in session_item['members'].keys())):
+        elif((session_item['opengroup'] == "2") & (session_item['limit'] > 0) & (not update.effective_chat.id in session_item['members'].keys())):
+            session_info = session_info + f"\n\n<b>Ссылка для подключения:</b>\n{session_item['invite']}"
+            buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
+            context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
+            session_list_dic[query]['members'][update.effective_chat.id] = {'first_name':update.effective_chat.first_name,'last_name':update.effective_chat.last_name,'user_name':update.effective_chat.username}
+            session_list_dic[query]['limit'] -= 1
+
+        elif((session_item['opengroup'] == "2") & (session_item['limit'] <= 0) & (not update.effective_chat.id in session_item['members'].keys())):
+            session_info = session_info + f"\n\nК сожалению, набор в это группу закрыт. Если в группе появятся места - мы пришлем уведомление."
+            session_list_dic[query]['queue'][update.effective_chat.id] = {'first_name':update.effective_chat.first_name,'last_name':update.effective_chat.last_name,'user_name':update.effective_chat.username}
+            buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
+            context.bot.send_message(update.effective_chat.id, session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
+
+        # elif((session_item['opengroup'] == "2") & (update.effective_chat.id in session_item['members'].keys())):
         #     session_info = f"Вы уже записаны в эту группу. Будем ждать Вас {session_item['date_time']}.\n\nСсылка для подключения: {session_item['invite']}"
-        #     bot.send_message(call.message.chat.id, session_info, parse_mode='html', reply_markup=view_session_list())
+        #     bot.send_message(update.effective_chat.id, session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
         #
-        # elif ((session_item['opengroup'] == "0") & (session_item['limit'] > 0) & (not call.message.chat.id in session_item['members'].keys())):
+        # elif ((session_item['opengroup'] == "0") & (session_item['limit'] > 0) & (not update.effective_chat.id in session_item['members'].keys())):
         #     session_info = session_info + f"\n\nЭто <b>закрытая группа</b> с ограниченым количеством участников (осталось <b>{session_item['limit']}</b> мест). Записаться можно отправив любую предложенную сумму в качестве пожертвования.\n\n" \
         #                                   f"<b>Инструкция:</b>\n" \
         #                                   f"* нажмите на кнопку с суммой, которую хотите пожертвовать, и перейдите по ссылке\n" \
         #                                   f"* пожертвование можно внести с помощью карты или ЯндексКошелька\n" \
         #                                   f"* <b>важно:</b> после успешного перевода вернитесь в чат бота и нажмите кнопку <b>Подтвердить</b>. Так мы сможем отследить Ваш донат и прислать ссылку для подключения. Обычно это занимает несколько минут\n" \
         #                                   f"* если все прошло хорошо, Вы автоматически получите ссылку для подключения через бот. Если Вы не получили ссылку или получили сообщение об ошибке, свяжитесь с @kolin_drafter, мы проверим перевод вручную."
-        #     bot.send_message(call.message.chat.id, session_info, parse_mode='html', reply_markup=donate(label, True))
-        #     # bot.send_photo(call.message.chat.id, photo, reply_markup=donate(label))
+        #     bot.send_message(update.effective_chat.id, session_info, parse_mode='html', reply_markup=donate(label, True))
+        #     # bot.send_photo(update.effective_chat.id, photo, reply_markup=donate(label))
         #
-        # elif ((session_item['opengroup'] == "0") & (call.message.chat.id in session_item['members'].keys())):
+        # elif ((session_item['opengroup'] == "0") & (update.effective_chat.id in session_item['members'].keys())):
         #     session_info = f"Вы уже записаны в эту группу. Будем ждать Вас {session_item['date_time']}.\n\nСсылка для подключения: {session_item['invite']}"
-        #     bot.send_message(call.message.chat.id, session_info, parse_mode='html', reply_markup=view_session_list())
+        #     bot.send_message(update.effective_chat.id, session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
         #
         # elif ((session_item['opengroup'] == "0") & (session_item['limit'] <= 0)):
         #     session_info = session_info + f"\n\nК сожалению, набор в это группу закрыт. Если в группе появятся места - мы пришлем уведомление."
-        #     session_list_dic[call.data]['queue'][call.message.chat.id] = {'first_name':call.message.chat.first_name,'last_name':call.message.chat.last_name,'user_name':call.message.chat.username}
-        #     bot.send_message(call.message.chat.id, session_info, parse_mode='html', reply_markup=view_session_list())
+        #     session_list_dic[query]['queue'][update.effective_chat.id] = {'first_name':update.effective_chat.first_name,'last_name':update.effective_chat.last_name,'user_name':update.effective_chat.username}
+        #     bot.send_message(update.effective_chat.id, session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
         # else:
         #     session_info = session_info + f"Хм... Что-то пошло не так...\n" \
         #                                   f"Попробуйте еще раз или поищите информацию в @helpwithoutprejudice. Там мы публикуем анонсы всех мероприятий."
-        #     bot.send_message(call.message.chat.id, session_info, parse_mode='html', reply_markup=view_session_list())
+        #     bot.send_message(update.effective_chat.id, session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
 
 
 def echo(update, context):
