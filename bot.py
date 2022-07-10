@@ -425,8 +425,6 @@ def start(update: Update, context: CallbackContext):
         user_cids[update.effective_chat.id]['first_name'] = update.effective_chat.first_name
         user_cids[update.effective_chat.id]['last_name'] = update.effective_chat.last_name
         user_cids[update.effective_chat.id]['user_name'] = update.effective_chat.username
-        context.bot.send_message(chat_id=update.effective_chat.id, text=user_cids)
-
 
 def help(update, context):
     """Sends a message when the command /help is issued."""
@@ -519,10 +517,8 @@ def messageHandler(update: Update, context: CallbackContext):
         context.bot.send_message(cid, msg)
 
     if ("appendblacklist" in msg) & (cid in admin_cids):
-        new_item = msg.split('_')[1]
-        msg = ""
-        for key in blacklist.keys():
-            msg = msg + f"{key} / {blacklist[key]['first_name']} / {blacklist[key]['last_name']} / {blacklist[key]['user_name']}\n"
+        new_item = int(msg.split('_')[1])
+        blacklist[new_item] = user_cids[new_item]
         context.bot.send_message(cid, msg)
 
     if ("viewgroupinfo" in msg) & (cid in admin_cids):
