@@ -41,8 +41,18 @@ def help(update, context):
     update.message.reply_text('Help!')
 
 def startCommand(update: Update, context: CallbackContext):
-    buttons = [[KeyboardButton("Yes")], [KeyboardButton("No")]]
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Welcome to my bot!", reply_markup=ReplyKeyboardMarkup(buttons))
+    buttons = [[KeyboardButton("Список групп")]]
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Привет", reply_markup=ReplyKeyboardMarkup(buttons))
+
+def queryHandler(update: Update, context: CallbackContext):
+    query = update.callback_query.data
+    update.callback_query.answer()
+
+    context.bot.send_message(chat_id=update.effective_chat.id, text=query)
+    context.bot.send_message(chat_id=update.effective_chat.id, text=Update)
+    context.bot.send_message(chat_id=update.effective_chat.id, text=CallbackContext)
+
+    print(f"likes => {likes} and dislikes => {dislikes}")
 
 
 def echo(update, context):
@@ -69,9 +79,9 @@ def main():
     dp = updater.dispatcher
 
     # on different commands - answer in Telegram
-    # dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("start", startCommand))
+    dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(CallbackQueryHandler(queryHandler))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
