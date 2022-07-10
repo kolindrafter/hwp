@@ -380,7 +380,7 @@ def queryHandler(update: Update, context: CallbackContext):
             if ((datetime.now()-dt_start).total_seconds() > 3):
                 while (update.effective_chat.id in session_list_dic[groupName]['members'].keys()):
                     del session_list_dic[groupName]['members'][update.effective_chat.id]
-                context.bot.send_message(to, f"Мы не смогли подтвердить Ваш платеж. Если Вы считаете, что произошла ошибка - свяжитесь с @kolin_drafter", parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
+                context.bot.send_message(update.effective_chat.id, f"Мы не смогли подтвердить Ваш платеж. Если Вы считаете, что произошла ошибка - свяжитесь с @kolin_drafter", parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
                 break
 
         if(payment_status):
