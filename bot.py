@@ -490,7 +490,7 @@ def messageHandler(update: Update, context: CallbackContext):
                     context.bot.send_message(chat_id=cid, text=notificationMsg, parse_mode="html", reply_markup=InlineKeyboardMarkup(buttons))
 
             for cid in admin_cids:
-                context.bot.send_message(chat_id=cid, text=notificationMsg, parse_mode="html", reply_markup=InlineKeyboardMarkup(buttons))
+                context.bot.send_message(chat_id=cid, text=notificationMsg, parse_mode="html")
         session_list_dic[groupName]['limit'] = newLimit
         session_list_dic[groupName]['queue'] = {}
 
@@ -572,6 +572,11 @@ def messageHandler(update: Update, context: CallbackContext):
         for key in user_cids.keys():
             msg = msg + f"{key} / {user_cids[key]['first_name']} / {user_cids[key]['last_name']} / {user_cids[key]['user_name']}\n"
         context.bot.send_message(cid, msg)
+
+    if ("updateinvite" in msg) & (cid in admin_cids):
+        msg = msg.split('--')
+        groupName = msg[1]
+        session_list_dic[groupName]['invite'] = msg[2]
 
 def createPayment(label, sum):
     payment = Quickpay(
@@ -662,42 +667,50 @@ def queryHandler(update: Update, context: CallbackContext):
             groupName = query.split('_')[1]
             session_item = session_list_dic[groupName]
 
-            session_list_dic[groupName]['members'][update.effective_chat.id] = {'first_name':update.effective_chat.first_name,'last_name':update.effective_chat.last_name,'user_name':update.effective_chat.username}
+            if not update.effective_chat.id in session_item['members'].keys():
 
-            successful_donate_message = f"Мы получили Ваше пожертвование! Спасибо!\n\nСсылка для подключения к закрытой конференции:\n {session_item['invite']}\n\nБудем ждать Вас {session_item['date_time']}"
-            failed_donate_message = f"Мы не смогли подтвердить Ваш платеж. Если Вы считаете, что произошла ошибка - свяжитесь с @kolin_drafter"
-            message_to_admin = f"Пришел донат на запись в группу {session_item['name']}.\nОтправитель: {update.effective_chat.first_name} {update.effective_chat.last_name}, @{update.effective_chat.username}\nИдентификатор платежа: {groupName}_{str(update.effective_chat.id)}"
-            buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
+                session_list_dic[groupName]['members'][update.effective_chat.id] = {'first_name':update.effective_chat.first_name,'last_name':update.effective_chat.last_name,'user_name':update.effective_chat.username}
 
-            groupDate = session_item['reminder']
-            dt_start = datetime.now()
-            utc=pytz.UTC
-            next_session = groupDate.split('_')
-            next_seven_days = [datetime.now(pytz.timezone('Europe/Moscow')) + timedelta(days=x) for x in range(7)]
-            reminder_date = [x for x in next_seven_days if str(x.weekday()) == next_session[0]][0]
-            next_session = datetime.strptime(next_session[-1],"%H:%M")
-            reminder_date = reminder_date.replace(hour=next_session.hour, minute=next_session.minute, tzinfo=utc) - timedelta(days=7)
+                successful_donate_message = f"Мы получили Ваше пожертвование! Спасибо!\n\nСсылка для подключения к закрытой конференции:\n {session_item['invite']}\n\nБудем ждать Вас {session_item['date_time']}"
+                failed_donate_message = f"Мы не смогли подтвердить Ваш платеж. Если Вы считаете, что произошла ошибка - свяжитесь с @kolin_drafter"
+                message_to_admin = f"Пришел донат на запись в группу {session_item['name']}.\nОтправитель: {update.effective_chat.first_name} {update.effective_chat.last_name}, @{update.effective_chat.username}\nИдентификатор платежа: {groupName}_{str(update.effective_chat.id)}"
+                buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
 
-            while(not payment_status):
-                history = client.operation_history(label=groupName+"_"+str(update.effective_chat.id))
-                operations = [x for x in history.operations if utc.localize(x.datetime) > reminder_date]
-                # operations = history.operations
-                for operation in operations:
-                    if (operation.status == "success"):
-                        context.bot.send_message(chat_id=update.effective_chat.id, text=successful_donate_message, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
-                        payment_status = True
-                    else:
-                        time.sleep(10)
-                if ((datetime.now()-dt_start).total_seconds() > 30):
-                    while (update.effective_chat.id in session_list_dic[groupName]['members'].keys()):
-                        del session_list_dic[groupName]['members'][update.effective_chat.id]
-                    context.bot.send_message(update.effective_chat.id, failed_donate_message, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
-                    break
+                groupDate = session_item['reminder']
+                dt_start = datetime.now()
+                utc=pytz.UTC
+                next_session = groupDate.split('_')
+                next_seven_days = [datetime.now(pytz.timezone('Europe/Moscow')) + timedelta(days=x) for x in range(7)]
+                reminder_date = [x for x in next_seven_days if str(x.weekday()) == next_session[0]][0]
+                next_session = datetime.strptime(next_session[-1],"%H:%M")
+                reminder_date = reminder_date.replace(hour=next_session.hour, minute=next_session.minute, tzinfo=utc) - timedelta(days=7)
 
-            if(payment_status):
-                session_list_dic[groupName]['limit'] -= 1
-                for cid in admin_cids:
-                    context.bot.send_message(chat_id=cid, text=message_to_admin+f"\nВремя платежа: {operation.datetime}\nВ группе осталось <b>{session_list_dic[groupName]['limit']}</b> мест.", parse_mode='html')
+                while(not payment_status):
+                    history = client.operation_history(label=groupName+"_"+str(update.effective_chat.id))
+                    operations = [x for x in history.operations if utc.localize(x.datetime) > reminder_date]
+                    # operations = history.operations
+                    for operation in operations:
+                        if (operation.status == "success"):
+                            context.bot.send_message(chat_id=update.effective_chat.id, text=successful_donate_message, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
+                            payment_status = True
+                        else:
+                            time.sleep(10)
+                    if ((datetime.now()-dt_start).total_seconds() > 30):
+                        while (update.effective_chat.id in session_list_dic[groupName]['members'].keys()):
+                            del session_list_dic[groupName]['members'][update.effective_chat.id]
+                        context.bot.send_message(update.effective_chat.id, failed_donate_message, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
+                        break
+
+                if(payment_status):
+                    session_list_dic[groupName]['limit'] -= 1
+                    for cid in admin_cids:
+                        context.bot.send_message(chat_id=cid, text=message_to_admin+f"\nВремя платежа: {operation.datetime}\nВ группе осталось <b>{session_list_dic[groupName]['limit']}</b> мест.", parse_mode='html')
+            else:
+                session_info = session_info + \
+                               f"\n\nВы уже записаны в эту группу. Будем ждать Вас {session_item['date_time']}.\n\nСсылка для подключения: {session_item['invite']}"
+                context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html')
+                buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
+                context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
 
         elif query == "just_donation":
             label = 'justdonate'+'_'+str(update.effective_chat.id)
