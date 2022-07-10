@@ -325,7 +325,7 @@ def queryHandler(update: Update, context: CallbackContext):
                        [InlineKeyboardButton("RUB 1000", callback_data="rub1000", url=RUR_1000.redirected_url)],
                        [InlineKeyboardButton("Подтвердить", callback_data="confirmPayment")],
                        [InlineKeyboardButton("Список групп", callback_data="groupList")]]
-            contextюbot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
+            context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
 
         elif((session_item['opengroup'] == "2") & (session_item['limit'] <= 0) & (not update.effective_chat.id in session_item['members'].keys())):
             session_info = session_info + f"\n\nК сожалению, набор в это группу закрыт. Если в группе появятся места - мы пришлем уведомление."
