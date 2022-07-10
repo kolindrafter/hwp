@@ -258,7 +258,7 @@ def messageHandler(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text="Спасибо. Наш терапевт свяжется с Вами.")
 
         for v in admin_cids:
-            bot.send_message(chat_id=v,
+            context.bot.send_message(chat_id=v,
                              text=f"У нас есть заявка на кризисную терапию.\n"
                               f"От: {update.effective_chat.first_name} {update.effective_chat.last_name} @{update.effective_chat.username}\n"
                               f"Запрос: {msg}")
