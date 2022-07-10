@@ -542,10 +542,10 @@ def messageHandler(update: Update, context: CallbackContext):
                      f"Limit: {session_item['limit']}\n" \
                      f"Members: "
                 for m in session_item['members']:
-                    msg = msg + f"{m} / {session_item['members']['first_name']} / {session_item['members']['last_name']} / {session_item['members']['user_name']}"
+                    msg = msg + f"{m} / {session_item['members'][m]['first_name']} / {session_item['members'][m]['last_name']} / {session_item['members'][m]['user_name']}"
                 msg = msg + "\nQueue: "
                 for m in session_item['queue']:
-                    msg = msg + f"{m} / {session_item['queue']['first_name']} / {session_item['queue']['last_name']} / {session_item['queue']['user_name']}"
+                    msg = msg + f"{m} / {session_item['queue'][m]['first_name']} / {session_item['queue'][m]['last_name']} / {session_item['queue'][m]['user_name']}"
                 context.bot.send_message(chat_id=cid, text=msg, parse_mode='html')
         else:
             for key in groupList[1:]:
@@ -561,10 +561,10 @@ def messageHandler(update: Update, context: CallbackContext):
                      f"Limit: {session_item['limit']}\n" \
                      f"Members: "
                 for m in session_item['members']:
-                    msg = msg + f"{m} / {session_item['members']['first_name']} / {session_item['members']['last_name']} / {session_item['members']['user_name']}"
+                    msg = msg + f"{m} / {session_item['members'][m]['first_name']} / {session_item['members'][m]['last_name']} / {session_item['members'][m]['user_name']}"
                 msg = msg + "\nQueue: "
                 for m in session_item['queue']:
-                    msg = msg + f"{m} / {session_item['queue']['first_name']} / {session_item['queue']['last_name']} / {session_item['queue']['user_name']}"
+                    msg = msg + f"{m} / {session_item['queue'][m]['first_name']} / {session_item['queue'][m]['last_name']} / {session_item['queue'][m]['user_name']}"
                 context.bot.send_message(chat_id=cid, text=msg, parse_mode='html')
 
     if ("viewusers" in msg) & (cid in admin_cids):
@@ -686,7 +686,7 @@ def queryHandler(update: Update, context: CallbackContext):
                         payment_status = True
                     else:
                         time.sleep(10)
-                if ((datetime.now()-dt_start).total_seconds() > 300):
+                if ((datetime.now()-dt_start).total_seconds() > 30):
                     while (update.effective_chat.id in session_list_dic[groupName]['members'].keys()):
                         del session_list_dic[groupName]['members'][update.effective_chat.id]
                     context.bot.send_message(update.effective_chat.id, failed_donate_message, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
@@ -701,9 +701,12 @@ def queryHandler(update: Update, context: CallbackContext):
             label = 'justdonate'+'_'+str(update.effective_chat.id)
             thank_you_message = f"Вы решили поддержать наш проект. Мы благодарны Вам."
             context.bot.send_message(chat_id=update.effective_chat.id, text=thank_you_message, parse_mode='html')
-            buttons = [[InlineKeyboardButton("RUB 100", callback_data="rub100", url=createPayment(label,10).redirected_url)],
+            buttons = [[InlineKeyboardButton("RUB 100", callback_data="rub100", url=createPayment(label,100).redirected_url)],
+               [InlineKeyboardButton("RUB 200", callback_data="rub200", url=createPayment(label,200).redirected_url)],
+               [InlineKeyboardButton("RUB 300", callback_data="rub300", url=createPayment(label,300).redirected_url)],
                [InlineKeyboardButton("RUB 500", callback_data="rub500", url=createPayment(label,500).redirected_url)],
                [InlineKeyboardButton("RUB 1000", callback_data="rub1000", url=createPayment(label,1000).redirected_url)],
+               [InlineKeyboardButton("RUB 2000", callback_data="rub2000", url=createPayment(label,2000).redirected_url)],
                [InlineKeyboardButton("Список групп", callback_data="groupList")]]
             thank_you_message = f"Выберите сумму, которую Вы хотели бы пожертвовать:"
             context.bot.send_message(chat_id=update.effective_chat.id, text=thank_you_message, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
