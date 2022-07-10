@@ -262,7 +262,7 @@ def queryHandler(update: Update, context: CallbackContext):
         session_info = f"<b>{session_item['name']}</b>\n\n<b>Время</b>: {str(session_item['date_time'])}\n<b>Ведущий терапевт</b>: {session_item['specialist']}\n<b>Аннотация</b>:\n{session_item['description']}"
         label = str(query)+'_'+str(update.message.chat.id)
 
-        if call.data == "crisis":
+        if query == "crisis":
             session_list_dic['crisis']['members'][update.message.chat.id] = {'chat_id':update.message.chat.id,'first_name':update.message.chat.first_name,'last_name':update.message.chat.last_name,'user_name':update.message.chat.username}
             context.bot.send_message(chat_id=update.message.chat.id, text="Опишите свою проблему в одном сообщении. Это поможет нам подобрать терапевта для Вас.", parse_mode='html')
 
