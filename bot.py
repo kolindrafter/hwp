@@ -424,6 +424,8 @@ def start(update: Update, context: CallbackContext):
         user_cids[update.effective_chat.id]['first_name'] = update.effective_chat.first_name
         user_cids[update.effective_chat.id]['last_name'] = update.effective_chat.last_name
         user_cids[update.effective_chat.id]['user_name'] = update.effective_chat.username
+        context.bot.send_message(chat_id=update.effective_chat.id, text=user_cids)
+
 
 def help(update, context):
     """Sends a message when the command /help is issued."""
