@@ -1,6 +1,26 @@
 import logging
 import os
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+import pandas as pd
+import pytz
+import re
+import numpy as np
+import time
+
+from telegram import *
+from telegram.ext import *
+from requests import *
+
+import yoomoney
+from yoomoney import Quickpay
+from yoomoney import Client
+
+import datetime
+from datetime import datetime
+from datetime import timedelta
+
+import threading
+from threading import Timer
+
 
 # Enables logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -19,6 +39,10 @@ def start(update, context):
 def help(update, context):
     """Sends a message when the command /help is issued."""
     update.message.reply_text('Help!')
+
+def startCommand(update: Update, context: CallbackContext):
+    buttons = [[KeyboardButton("Yes")], [KeyboardButton("No")]]
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Welcome to my bot!", reply_markup=ReplyKeyboardMarkup(buttons))
 
 
 def echo(update, context):
@@ -45,8 +69,9 @@ def main():
     dp = updater.dispatcher
 
     # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler("start", start))
+    # dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(CommandHandler("start", startCommand))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
@@ -54,7 +79,6 @@ def main():
     # log all errors
     dp.add_error_handler(error)
     updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=TOKEN, webhook_url=APP_NAME + TOKEN)
-    # webhook_url=APP_NAME + TOKEN
     updater.idle()
 
 
