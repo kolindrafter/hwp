@@ -59,7 +59,7 @@ session_list_dic = {
                        "* Активный бмен личным опытом, чувствами, переживаниями. Возможность получить поддержку, обратную связь, новые навыки, в доброжелательный обстановке.\n\n"
                        "* Психолог поможет создать безопасную, свободную и творчесткую атмосферу для достижения группой и каждым участником максимального позитивных результатов. Полученный опыт, навыки и знания помогут с существующими и предстоящими жизненными ситуациями.",
          'invite':f"Meeting ID: 230 365 3201 | Passcode: gaXp8U | <a href='https://us05web.zoom.us/j/2303653201?pwd=WWJ1a3ZoblVFWTJIRHh4cGt6K0ppdz09'>Zoom</a>",
-         'opengroup':"0",
+         'opengroup':"2",
          'limit':20,
          'members':{},
          'queue':{}},
@@ -71,7 +71,7 @@ session_list_dic = {
          'picture':"NULL",
          'description':"Продолжительность - 10 недель",
          'invite':f"Meeting ID: 230 365 3201 | Passcode: gaXp8U | <a href='https://us05web.zoom.us/j/2303653201?pwd=WWJ1a3ZoblVFWTJIRHh4cGt6K0ppdz09'>Zoom</a>",
-         'opengroup':"0",
+         'opengroup':"2",
          'limit':20,
          'members':{},
          'queue':{}},
@@ -90,7 +90,7 @@ session_list_dic = {
                        "* проявляют агрессию, устраивают протесты\n\n"
                        "Продолжительность - 8 встреч по 1.5 часа",
          'invite':f"Meeting ID: 230 365 3201 | Passcode: gaXp8U | <a href='https://us05web.zoom.us/j/2303653201?pwd=WWJ1a3ZoblVFWTJIRHh4cGt6K0ppdz09'>Zoom</a>",
-         'opengroup':"0",
+         'opengroup':"2",
          'limit':10,
          'members':{},
          'queue':{}},
@@ -116,7 +116,7 @@ session_list_dic = {
                        "* Вы не чувствуете себя в безопасности\n\n"
                        "Продолжительность -  8 встреч по 1,5 часа.",
          'invite':f"Meeting ID: 230 365 3201 | Passcode: gaXp8U | <a href='https://us05web.zoom.us/j/2303653201?pwd=WWJ1a3ZoblVFWTJIRHh4cGt6K0ppdz09'>Zoom</a>",
-         'opengroup':"0",
+         'opengroup':"2",
          'limit':15,
          'members':{},
          'queue':{}},
@@ -140,7 +140,7 @@ session_list_dic = {
                        "* свой вариант\n\n"
                        "Продолжительность - 8 встреч по 1,5 часа.",
          'invite':f"Meeting ID: 230 365 3201 | Passcode: gaXp8U | <a href='https://us05web.zoom.us/j/2303653201?pwd=WWJ1a3ZoblVFWTJIRHh4cGt6K0ppdz09'>Zoom</a>",
-         'opengroup':"0",
+         'opengroup':"2",
          'limit':15,
          'members':{},
          'queue':{}},
@@ -166,7 +166,7 @@ session_list_dic = {
          'picture':"NULL",
          'description':"Продолжительность - 8 недель.",
          'invite':f"Meeting ID: 230 365 3201 | Passcode: gaXp8U | <a href='https://us05web.zoom.us/j/2303653201?pwd=WWJ1a3ZoblVFWTJIRHh4cGt6K0ppdz09'>Zoom</a>",
-         'opengroup':"0",
+         'opengroup':"2",
          'limit':10,
          'members':{},
          'queue':{}},
@@ -188,7 +188,7 @@ session_list_dic = {
                        "Эти и другие вопросы мы разберём в закрытой группе для родителей. Группе для тех, кто каждый день принимает решения не только за себя. И сам при этом нуждается в эмоциональной поддержке.\n\n"
                        "Продолжительность - 5 недель",
          'invite':f"Meeting ID: 230 365 3201 | Passcode: gaXp8U | <a href='https://us05web.zoom.us/j/2303653201?pwd=WWJ1a3ZoblVFWTJIRHh4cGt6K0ppdz09'>Zoom</a>",
-         'opengroup':"0",
+         'opengroup':"2",
          'limit':10,
          'members':{},
          'queue':{}},
@@ -201,7 +201,7 @@ session_list_dic = {
          'description':"Я есть и я здесь.\n\n"
                        "Продолжительность - 5 недель",
          'invite':f"Meeting ID: 230 365 3201 | Passcode: gaXp8U | <a href='https://us05web.zoom.us/j/2303653201?pwd=WWJ1a3ZoblVFWTJIRHh4cGt6K0ppdz09'>Zoom</a>",
-         'opengroup':"0",
+         'opengroup':"2",
          'limit':15,
          'members':{},
          'queue':{}},
@@ -231,6 +231,16 @@ def help(update, context):
     help_message = f"Вот список команд, которые понимает наш бот:\n /start - начать работу с ботом\n /help - посмотреть список команд\n /list - посмотреть список запланированных групп психологической помощи.\n"
     update.message.reply_text(help_message)
 
+def list(update, context):
+    """Sends a message when the command /help is issued."""
+    global session_list_dic
+    help_message = f"СПисок групп:"
+    buttons=[]
+    for key in session_list_dic.keys():
+        buttons.append([InlineKeyboardButton(session_list_dic[key]['name'], callback_data=key)])
+    buttons.append([InlineKeyboardButton("Поддержать проект", callback_data="just_donation")])
+    context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text=start_message)
+
 def whoami(update, context):
     """Sends a message when the command /help is issued."""
     response = str(update.message.chat.id) + " " + \
@@ -247,13 +257,13 @@ def startCommand(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text=start_message)
 
 def messageHandler(update: Update, context: CallbackContext):
-    
+
     global session_list_dic
     global admin_cids
     cid = str(update.effective_chat.id)
     msg = update.message.text
 
-    if cid in session_list_dic['crisis']['members']:
+    if int(cid) in session_list_dic['crisis']['members']:
         del session_list_dic['crisis']['members'][cid]
         buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
         context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text="Спасибо. Наш терапевт свяжется с Вами.")
@@ -353,8 +363,8 @@ def queryHandler(update: Update, context: CallbackContext):
                                           f"* если все прошло хорошо, Вы автоматически получите ссылку для подключения через бот. Если Вы не получили ссылку или получили сообщение об ошибке, свяжитесь с @kolin_drafter, мы проверим перевод вручную."
 
             buttons = [[InlineKeyboardButton("RUB 100", callback_data="rub100", url=createPayment(label,10).redirected_url)],
-                       [InlineKeyboardButton("RUB 500", callback_data="rub500", url=createPayment(label,10).redirected_url)],
-                       [InlineKeyboardButton("RUB 1000", callback_data="rub1000", url=createPayment(label,10).redirected_url)],
+                       [InlineKeyboardButton("RUB 500", callback_data="rub500", url=createPayment(label,500).redirected_url)],
+                       [InlineKeyboardButton("RUB 1000", callback_data="rub1000", url=createPayment(label,1000).redirected_url)],
                        [InlineKeyboardButton("Подтвердить", callback_data="confirmPayment_"+query)],
                        [InlineKeyboardButton("Список групп", callback_data="groupList")]]
             context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
@@ -371,7 +381,7 @@ def queryHandler(update: Update, context: CallbackContext):
             context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
 
         else:
-            session_info = session_info + f"Хм... Что-то пошло не так...\n" \
+            session_info = session_info + f"\n\nХм... Что-то пошло не так...\n" \
                                           f"Попробуйте еще раз или поищите информацию в @helpwithoutprejudice. Там мы публикуем анонсы всех мероприятий."
             buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
             context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
