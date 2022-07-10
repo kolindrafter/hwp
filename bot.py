@@ -269,7 +269,6 @@ def queryHandler(update: Update, context: CallbackContext):
     global session_list_dic
 
     yoomoney_token = "4100117805460248.11EA3C4E3C9C83223569E5AC97BB3021B91BF3223716AF874F39B444D9FC3BD60D5D0EA790F537779AF123D171566090201CCEB73D2B956B925E2E7C95F7CD781C7894BF3C7549CB55D93FCD6E7AEB36F86AFBCE9747845968DB0D6794A548702838EB302925667B83BA85CFBC1F6234EB89C99BECBD15EF60CBB265D7BFFCEB"
-    updater = Updater(TOKEN, use_context=True)
     client = Client(yoomoney_token)
 
     if "groupList" == query:
@@ -409,6 +408,7 @@ def main():
     APP_NAME='https://helpwithoutprejudice.herokuapp.com/' #Edit the heroku app-name
 
     # Get the dispatcher to register handlers
+    updater = Updater(TOKEN, use_context=True)
     dp = updater.dispatcher
 
     # on different commands - answer in Telegram
