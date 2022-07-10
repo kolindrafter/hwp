@@ -290,11 +290,43 @@ def queryHandler(update: Update, context: CallbackContext):
             context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
 
         elif((session_item['opengroup'] == "2") & (session_item['limit'] > 0) & (not update.effective_chat.id in session_item['members'].keys())):
-            session_info = session_info + f"\n\n<b>Ссылка для подключения:</b>\n{session_item['invite']}"
-            buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
-            context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
-            session_list_dic[query]['members'][update.effective_chat.id] = {'first_name':update.effective_chat.first_name,'last_name':update.effective_chat.last_name,'user_name':update.effective_chat.username}
-            session_list_dic[query]['limit'] -= 1
+            session_info = session_info + f"\n\nЭто <b>закрытая группа</b> с ограниченым количеством участников (осталось <b>{session_item['limit']}</b> мест). Записаться можно отправив любую предложенную сумму в качестве пожертвования.\n\n" \
+                                          f"<b>Инструкция:</b>\n" \
+                                          f"* нажмите на кнопку с суммой, которую хотите пожертвовать, и перейдите по ссылке\n" \
+                                          f"* пожертвование можно внести с помощью карты или ЯндексКошелька\n" \
+                                          f"* <b>важно:</b> после успешного перевода вернитесь в чат бота и нажмите кнопку <b>Подтвердить</b>. Так мы сможем отследить Ваш донат и прислать ссылку для подключения. Обычно это занимает несколько минут\n" \
+                                          f"* если все прошло хорошо, Вы автоматически получите ссылку для подключения через бот. Если Вы не получили ссылку или получили сообщение об ошибке, свяжитесь с @kolin_drafter, мы проверим перевод вручную."
+
+            RUR_100 = Quickpay(
+            receiver="4100117805460248",
+            quickpay_form="donate",
+            targets="Sponsor this project",
+            paymentType="SB",
+            sum=10,
+            label=label)
+
+            RUR_500 = Quickpay(
+                    receiver="4100117805460248",
+                    quickpay_form="donate",
+                    targets="Sponsor this project",
+                    paymentType="SB",
+                    sum=500,
+                    label=label)
+
+            RUR_1000 = Quickpay(
+                    receiver="4100117805460248",
+                    quickpay_form="donate",
+                    targets="Sponsor this project",
+                    paymentType="SB",
+                    sum=1000,
+                    label=label)
+
+            buttons = [[InlineKeyboardButton("RUB 100", callback_data="rub100", url=RUR_100.redirected_url)],
+                       [InlineKeyboardButton("RUB 500", callback_data="rub500", url=RUR_500.redirected_url)],
+                       [InlineKeyboardButton("RUB 1000", callback_data="rub1000", url=RUR_1000.redirected_url)],
+                       [InlineKeyboardButton("Подтвердить", callback_data="confirmPayment")],
+                       [InlineKeyboardButton("Список групп", callback_data="groupList")]]
+            contextюbot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
 
         elif((session_item['opengroup'] == "2") & (session_item['limit'] <= 0) & (not update.effective_chat.id in session_item['members'].keys())):
             session_info = session_info + f"\n\nК сожалению, набор в это группу закрыт. Если в группе появятся места - мы пришлем уведомление."
@@ -302,10 +334,11 @@ def queryHandler(update: Update, context: CallbackContext):
             buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
             context.bot.send_message(update.effective_chat.id, session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
 
-        # elif((session_item['opengroup'] == "2") & (update.effective_chat.id in session_item['members'].keys())):
-        #     session_info = f"Вы уже записаны в эту группу. Будем ждать Вас {session_item['date_time']}.\n\nСсылка для подключения: {session_item['invite']}"
-        #     bot.send_message(update.effective_chat.id, session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
-        #
+        elif((session_item['opengroup'] == "2") & (update.effective_chat.id in session_item['members'].keys())):
+            session_info = f"Вы уже записаны в эту группу. Будем ждать Вас {session_item['date_time']}.\n\nСсылка для подключения: {session_item['invite']}"
+            buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
+            context.bot.send_message(update.effective_chat.id, session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
+
         # elif ((session_item['opengroup'] == "0") & (session_item['limit'] > 0) & (not update.effective_chat.id in session_item['members'].keys())):
         #     session_info = session_info + f"\n\nЭто <b>закрытая группа</b> с ограниченым количеством участников (осталось <b>{session_item['limit']}</b> мест). Записаться можно отправив любую предложенную сумму в качестве пожертвования.\n\n" \
         #                                   f"<b>Инструкция:</b>\n" \
