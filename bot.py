@@ -258,7 +258,7 @@ def queryHandler(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text="Список групп:")
 
     if query in set(session_list_dic.keys()):
-        session_item = session_list_dic[call.data]
+        session_item = session_list_dic[query]
         session_info = f"<b>{session_item['name']}</b>\n\n<b>Время</b>: {str(session_item['date_time'])}\n<b>Ведущий терапевт</b>: {session_item['specialist']}\n<b>Аннотация</b>:\n{session_item['description']}"
         label = str(query)+'_'+str(update.message.chat.id)
 
@@ -268,7 +268,8 @@ def queryHandler(update: Update, context: CallbackContext):
 
         elif(session_item['opengroup'] == "1"):
             session_info = session_info + f"\n\n<b>Ссылка для подключения:</b>\n{session_item['invite']}"
-            context.bot.send_message(chat_id=update.message.chat.id, text=session_info, parse_mode='html', reply_markup=view_session_list())
+            buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
+            context.bot.send_message(chat_id=update.message.chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
 
         # elif((session_item['opengroup'] == "2") & (session_item['limit'] > 0) & (not call.message.chat.id in session_item['members'].keys())):
         #     session_info = session_info + f"\n\n<b>Ссылка для подключения:</b>\n{session_item['invite']}"
