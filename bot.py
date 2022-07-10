@@ -40,8 +40,7 @@ session_list_dic = {
          'description':"Продолжительность - 10 недель",
          'invite': f"Meeting ID: 230 365 3201 | Passcode: gaXp8U | <a href='https://us05web.zoom.us/j/2303653201?pwd=WWJ1a3ZoblVFWTJIRHh4cGt6K0ppdz09'>Zoom</a>",
          'opengroup':"2",
-         'limit':0,
-         # 'limit':15,
+         'limit':15,
          'members':{},
          'queue':{}},
     'volunteertraining':
