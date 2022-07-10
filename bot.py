@@ -257,6 +257,57 @@ def queryHandler(update: Update, context: CallbackContext):
             buttons.append([InlineKeyboardButton(session_list_dic[key]['name'], callback_data=key)])
         context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text="Список групп:")
 
+    if query in set(session_list_dic.keys()):
+        session_item = session_list_dic[call.data]
+        session_info = f"<b>{session_item['name']}</b>\n\n<b>Время</b>: {str(session_item['date_time'])}\n<b>Ведущий терапевт</b>: {session_item['specialist']}\n<b>Аннотация</b>:\n{session_item['description']}"
+        label = str(query)+'_'+str(update.message.chat.id)
+
+        if call.data == "crisis":
+            session_list_dic['crisis']['members'][update.message.chat.id] = {'chat_id':update.message.chat.id,'first_name':update.message.chat.first_name,'last_name':update.message.chat.last_name,'user_name':update.message.chat.username}
+            context.bot.send_message(chat_id=update.message.chat.id, text="Опишите свою проблему в одном сообщении. Это поможет нам подобрать терапевта для Вас.", parse_mode='html')
+
+        elif(session_item['opengroup'] == "1"):
+            session_info = session_info + f"\n\n<b>Ссылка для подключения:</b>\n{session_item['invite']}"
+            context.bot.send_message(chat_id=update.message.chat.id, text=session_info, parse_mode='html', reply_markup=view_session_list())
+
+        # elif((session_item['opengroup'] == "2") & (session_item['limit'] > 0) & (not call.message.chat.id in session_item['members'].keys())):
+        #     session_info = session_info + f"\n\n<b>Ссылка для подключения:</b>\n{session_item['invite']}"
+        #     bot.send_message(call.message.chat.id, session_info, parse_mode='html', reply_markup=view_session_list())
+        #     session_list_dic[call.data]['members'][call.message.chat.id] = {'first_name':call.message.chat.first_name,'last_name':call.message.chat.last_name,'user_name':call.message.chat.username}
+        #     session_list_dic[call.data]['limit'] -= 1
+        #
+        # elif((session_item['opengroup'] == "2") & (session_item['limit'] <= 0) & (not call.message.chat.id in session_item['members'].keys())):
+        #     session_info = session_info + f"\n\nК сожалению, набор в это группу закрыт. Если в группе появятся места - мы пришлем уведомление."
+        #     session_list_dic[call.data]['queue'][call.message.chat.id] = {'first_name':call.message.chat.first_name,'last_name':call.message.chat.last_name,'user_name':call.message.chat.username}
+        #     bot.send_message(call.message.chat.id, session_info, parse_mode='html', reply_markup=view_session_list())
+        #
+        # elif((session_item['opengroup'] == "2") & (call.message.chat.id in session_item['members'].keys())):
+        #     session_info = f"Вы уже записаны в эту группу. Будем ждать Вас {session_item['date_time']}.\n\nСсылка для подключения: {session_item['invite']}"
+        #     bot.send_message(call.message.chat.id, session_info, parse_mode='html', reply_markup=view_session_list())
+        #
+        # elif ((session_item['opengroup'] == "0") & (session_item['limit'] > 0) & (not call.message.chat.id in session_item['members'].keys())):
+        #     session_info = session_info + f"\n\nЭто <b>закрытая группа</b> с ограниченым количеством участников (осталось <b>{session_item['limit']}</b> мест). Записаться можно отправив любую предложенную сумму в качестве пожертвования.\n\n" \
+        #                                   f"<b>Инструкция:</b>\n" \
+        #                                   f"* нажмите на кнопку с суммой, которую хотите пожертвовать, и перейдите по ссылке\n" \
+        #                                   f"* пожертвование можно внести с помощью карты или ЯндексКошелька\n" \
+        #                                   f"* <b>важно:</b> после успешного перевода вернитесь в чат бота и нажмите кнопку <b>Подтвердить</b>. Так мы сможем отследить Ваш донат и прислать ссылку для подключения. Обычно это занимает несколько минут\n" \
+        #                                   f"* если все прошло хорошо, Вы автоматически получите ссылку для подключения через бот. Если Вы не получили ссылку или получили сообщение об ошибке, свяжитесь с @kolin_drafter, мы проверим перевод вручную."
+        #     bot.send_message(call.message.chat.id, session_info, parse_mode='html', reply_markup=donate(label, True))
+        #     # bot.send_photo(call.message.chat.id, photo, reply_markup=donate(label))
+        #
+        # elif ((session_item['opengroup'] == "0") & (call.message.chat.id in session_item['members'].keys())):
+        #     session_info = f"Вы уже записаны в эту группу. Будем ждать Вас {session_item['date_time']}.\n\nСсылка для подключения: {session_item['invite']}"
+        #     bot.send_message(call.message.chat.id, session_info, parse_mode='html', reply_markup=view_session_list())
+        #
+        # elif ((session_item['opengroup'] == "0") & (session_item['limit'] <= 0)):
+        #     session_info = session_info + f"\n\nК сожалению, набор в это группу закрыт. Если в группе появятся места - мы пришлем уведомление."
+        #     session_list_dic[call.data]['queue'][call.message.chat.id] = {'first_name':call.message.chat.first_name,'last_name':call.message.chat.last_name,'user_name':call.message.chat.username}
+        #     bot.send_message(call.message.chat.id, session_info, parse_mode='html', reply_markup=view_session_list())
+        # else:
+        #     session_info = session_info + f"Хм... Что-то пошло не так...\n" \
+        #                                   f"Попробуйте еще раз или поищите информацию в @helpwithoutprejudice. Там мы публикуем анонсы всех мероприятий."
+        #     bot.send_message(call.message.chat.id, session_info, parse_mode='html', reply_markup=view_session_list())
+
 
 def echo(update, context):
     """Echos the user message."""
