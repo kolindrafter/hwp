@@ -517,7 +517,7 @@ def messageHandler(update: Update, context: CallbackContext):
         context.bot.send_message(cid, msg)
 
     if ("appendblacklist" in msg) & (cid in admin_cids):
-        new_item = msg.split('_')[1]
+        new_item = int(msg.split('_')[1])
         blacklist[new_item] = user_cids[new_item]
 
     if ("viewgroupinfo" in msg) & (cid in admin_cids):
@@ -587,7 +587,7 @@ def queryHandler(update: Update, context: CallbackContext):
     yoomoney_token = "4100117805460248.11EA3C4E3C9C83223569E5AC97BB3021B91BF3223716AF874F39B444D9FC3BD60D5D0EA790F537779AF123D171566090201CCEB73D2B956B925E2E7C95F7CD781C7894BF3C7549CB55D93FCD6E7AEB36F86AFBCE9747845968DB0D6794A548702838EB302925667B83BA85CFBC1F6234EB89C99BECBD15EF60CBB265D7BFFCEB"
     client = Client(yoomoney_token)
 
-    if not str(update.effective_chat.id) in blacklist.keys():
+    if not update.effective_chat.id in blacklist.keys():
         if "groupList" == query:
             buttons = []
             for key in session_list_dic.keys():
