@@ -260,16 +260,16 @@ def queryHandler(update: Update, context: CallbackContext):
     if query in set(session_list_dic.keys()):
         session_item = session_list_dic[query]
         session_info = f"<b>{session_item['name']}</b>\n\n<b>Время</b>: {str(session_item['date_time'])}\n<b>Ведущий терапевт</b>: {session_item['specialist']}\n<b>Аннотация</b>:\n{session_item['description']}"
-        label = str(query)+'_'+str(update.message.chat.id)
+        label = str(query)+'_'+str(update.effective_chat.id)
 
         if query == "crisis":
-            session_list_dic['crisis']['members'][update.message.chat.id] = {'chat_id':update.message.chat.id,'first_name':update.message.chat.first_name,'last_name':update.message.chat.last_name,'user_name':update.message.chat.username}
-            context.bot.send_message(chat_id=update.message.chat.id, text="Опишите свою проблему в одном сообщении. Это поможет нам подобрать терапевта для Вас.", parse_mode='html')
+            session_list_dic['crisis']['members'][update.effective_chat.id] = {'chat_id':update.effective_chat.id,'first_name':update.message.chat.first_name,'last_name':update.message.chat.last_name,'user_name':update.message.chat.username}
+            context.bot.send_message(chat_id=update.effective_chat.id, text="Опишите свою проблему в одном сообщении. Это поможет нам подобрать терапевта для Вас.", parse_mode='html')
 
         elif(session_item['opengroup'] == "1"):
             session_info = session_info + f"\n\n<b>Ссылка для подключения:</b>\n{session_item['invite']}"
             buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
-            context.bot.send_message(chat_id=update.message.chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
+            context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
 
         # elif((session_item['opengroup'] == "2") & (session_item['limit'] > 0) & (not call.message.chat.id in session_item['members'].keys())):
         #     session_info = session_info + f"\n\n<b>Ссылка для подключения:</b>\n{session_item['invite']}"
