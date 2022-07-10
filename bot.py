@@ -282,6 +282,7 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", startCommand))
     dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(CommandHandler("whoami", whoami))
     dp.add_handler(CallbackQueryHandler(queryHandler))
 
     # on noncommand i.e message - echo the message on Telegram
