@@ -228,11 +228,19 @@ def start(update, context):
 
 def help(update, context):
     """Sends a message when the command /help is issued."""
-    update.message.reply_text('Help!')
+    help_message = f"Вот список команд, которые понимает наш бот:\n /start - начать работу с ботом\n /help - посмотреть список команд\n /list - посмотреть список запланированных групп психологической помощи.\n"
+    update.message.reply_text(help_message)
+
+def whoami(update, context):
+    """Sends a message when the command /help is issued."""
+    update.message.reply_text(text=update)
 
 def startCommand(update: Update, context: CallbackContext):
+    start_message = f"Здравствуйте! Это бот команды @helpwithoutprejudice. Мы оказываем психологическую поддержку всем, кому нелегко в нынешнее время.\n" \
+                    f"С помощью этого бота Вы сможете посмотреть список групп психологической поддержки, создать напоминание, записаться в группу, отправить донат и запросить краткосрочную терапию с одним из наших терапевтов-волонтеров.\n" \
+                    f"Вот список команд, которые понимает наш бот:\n /start - начать работу с ботом\n /help - посмотреть список команд\n /list - посмотреть список запланированных групп психологической помощи.\n"
     buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
-    context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text="Привет")
+    context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text=start_message)
 
 def queryHandler(update: Update, context: CallbackContext):
     query = update.callback_query.data
