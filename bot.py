@@ -35,13 +35,12 @@ def start(update, context):
     """Sends a message when the command /start is issued."""
     update.message.reply_text('Hi!')
 
-
 def help(update, context):
     """Sends a message when the command /help is issued."""
     update.message.reply_text('Help!')
 
 def startCommand(update: Update, context: CallbackContext):
-    buttons = [[KeyboardButton("Список групп")]]
+    buttons = [[InlineKeyboardButton("Список групп", callback_data='groupList')]]
     context.bot.send_message(chat_id=update.effective_chat.id, text="Привет", reply_markup=ReplyKeyboardMarkup(buttons))
 
 def queryHandler(update: Update, context: CallbackContext):
@@ -84,7 +83,7 @@ def main():
     dp.add_handler(CallbackQueryHandler(queryHandler))
 
     # on noncommand i.e message - echo the message on Telegram
-    dp.add_handler(MessageHandler(Filters.text, echo))
+    # dp.add_handler(MessageHandler(Filters.text, echo))
 
     # log all errors
     dp.add_error_handler(error)
