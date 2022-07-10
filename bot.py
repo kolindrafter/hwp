@@ -246,6 +246,23 @@ def startCommand(update: Update, context: CallbackContext):
     buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
     context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text=start_message)
 
+def messageHandler(update: Update, context: CallbackContext):
+    global session_list_dic
+    global admin_cids
+    cid = update.effective_chat.id
+    msg = update.message.text
+
+    if cid in session_list_dic['crisis']['members']:
+        del session_list_dic['crisis']['members'][cid]
+        buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
+        context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text="Спасибо. Наш терапевт свяжется с Вами.")
+
+        for v in admin_cids:
+            bot.send_message(chat_id=v,
+                             text=f"У нас есть заявка на кризисную терапию.\n"
+                              f"От: {update.effective_chat.first_name} {update.effective_chat.last_name} @{update.effective_chat.username}\n"
+                              f"Запрос: {msg}")
+
 def queryHandler(update: Update, context: CallbackContext):
     query = update.callback_query.data
     update.callback_query.answer()
@@ -263,7 +280,7 @@ def queryHandler(update: Update, context: CallbackContext):
         label = str(query)+'_'+str(update.effective_chat.id)
 
         if query == "crisis":
-            session_list_dic['crisis']['members'][update.effective_chat.id] = {'chat_id':update.effective_chat.id,'first_name':update.effective_chat.first_name,'last_name':update.effective_chat.last_name,'user_name':update.effective_chat.username}
+            session_list_dic['crisis']['members'][update.effective_chat.id] = {'chat_id':update.effective_chat.id,'first_name':update.effective_chat.first_name,'last_name':update.effective_chat.last_name,'user_name':update.effective_chat.username, 'date_time': datetime.now()}
             context.bot.send_message(chat_id=update.effective_chat.id, text="Опишите свою проблему в одном сообщении. Это поможет нам подобрать терапевта для Вас.", parse_mode='html')
 
         elif(session_item['opengroup'] == "1"):
@@ -340,6 +357,7 @@ def main():
     dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("whoami", whoami))
     dp.add_handler(CallbackQueryHandler(queryHandler))
+    dp.add_handler(MessageHandler(Filters.text, messageHandler))
 
     # on noncommand i.e message - echo the message on Telegram
     # dp.add_handler(MessageHandler(Filters.text, echo))
