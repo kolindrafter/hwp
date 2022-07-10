@@ -237,9 +237,13 @@ def startCommand(update: Update, context: CallbackContext):
 def queryHandler(update: Update, context: CallbackContext):
     query = update.callback_query.data
     update.callback_query.answer()
+    global session_list_dic
 
     if "groupList" in query:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=query)
+        buttons = []
+        for key in session_list_dic.keys():
+            buttons.append([InlineKeyboardButton(session_list_dic[key]['name'], callback_data=key)])
+        context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text="Список групп:")
 
 
 def echo(update, context):
