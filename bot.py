@@ -47,9 +47,8 @@ def queryHandler(update: Update, context: CallbackContext):
     query = update.callback_query.data
     update.callback_query.answer()
 
-    context.bot.send_message(chat_id=update.effective_chat.id, text=query)
-    context.bot.send_message(chat_id=update.effective_chat.id, text=Update)
-    context.bot.send_message(chat_id=update.effective_chat.id, text=CallbackContext)
+    if "groupList" in query:
+        context.bot.send_message(chat_id=update.effective_chat.id, text="А я сейчас вам покажу")
 
     print(f"likes => {likes} and dislikes => {dislikes}")
 
