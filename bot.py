@@ -231,8 +231,8 @@ def help(update, context):
     update.message.reply_text('Help!')
 
 def startCommand(update: Update, context: CallbackContext):
-    buttons = [[InlineKeyboardButton("Список групп", callback_data='groupList')]]
-    context.bot.send_message(chat_id=update.effective_chat.id, text="asdfasdfasdf", reply_markup=InlineKeyboardButton(buttons))
+    buttons = [[InlineKeyboardButton("👍", callback_data="like")], [InlineKeyboardButton("👎", callback_data="dislike")]]
+    context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text="Did you like the image?")
 
 def queryHandler(update: Update, context: CallbackContext):
     query = update.callback_query.data
