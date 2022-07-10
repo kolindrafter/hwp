@@ -504,20 +504,37 @@ def messageHandler(update: Update, context: CallbackContext):
             msg = msg + key + f"\n"
         context.bot.send_message(cid, msg)
     if ("viewgroupinfo" in msg) & (cid in admin_cids):
-        for key in session_list_dic.keys():
-            session_item = session_list_dic[key]
-            msg = f"Name: {session_item['name']}\n" \
-                 f"Date: {session_item['date_time']}\n" \
-                 f"Reminder: {session_item['reminder']}\n" \
-                 f"Specialist: {session_item['specialist']}\n" \
-                 f"Picture: {session_item['picture']}\n" \
-                 f"Description: {session_item['description']}\n" \
-                 f"Invite: {session_item['invite']}\n" \
-                 f"Opengroup: {session_item['opengroup']}\n" \
-                 f"Limit: {session_item['limit']}\n" \
-                 f"Members: {session_item['members']}\n" \
-                 f"Queue: {session_item['queue']}\n"
-            context.bot.send_message(cid, msg)
+        groupList = msg.split('_')
+        if len(groupList) == 1:
+            for key in session_list_dic.keys():
+                session_item = session_list_dic[key]
+                msg = f"Name: {session_item['name']}\n" \
+                     f"Date: {session_item['date_time']}\n" \
+                     f"Reminder: {session_item['reminder']}\n" \
+                     f"Specialist: {session_item['specialist']}\n" \
+                     f"Picture: {session_item['picture']}\n" \
+                     f"Description: {session_item['description']}\n" \
+                     f"Invite: {session_item['invite']}\n" \
+                     f"Opengroup: {session_item['opengroup']}\n" \
+                     f"Limit: {session_item['limit']}\n" \
+                     f"Members: {session_item['members']}\n" \
+                     f"Queue: {session_item['queue']}\n"
+                context.bot.send_message(chat_id=cid, text=msg, parse_mode='html')
+        else:
+            for key in groupList[1:]:
+                session_item = session_list_dic[key]
+                msg = f"Name: {session_item['name']}\n" \
+                     f"Date: {session_item['date_time']}\n" \
+                     f"Reminder: {session_item['reminder']}\n" \
+                     f"Specialist: {session_item['specialist']}\n" \
+                     f"Picture: {session_item['picture']}\n" \
+                     f"Description: {session_item['description']}\n" \
+                     f"Invite: {session_item['invite']}\n" \
+                     f"Opengroup: {session_item['opengroup']}\n" \
+                     f"Limit: {session_item['limit']}\n" \
+                     f"Members: {session_item['members']}\n" \
+                     f"Queue: {session_item['queue']}\n"
+                context.bot.send_message(chat_id=cid, text=msg, parse_mode='html')
 
 def createPayment(label, sum):
     payment = Quickpay(
