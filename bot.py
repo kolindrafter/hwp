@@ -237,9 +237,7 @@ def startCommand(update: Update, context: CallbackContext):
 def queryHandler(update: Update, context: CallbackContext):
     query = update.callback_query.data
     update.callback_query.answer()
-
-    if "groupList" in query:
-        context.bot.send_message(chat_id=update.effective_chat.id, text="А я сейчас вам покажу")
+    context.bot.send_message(chat_id=update.effective_chat.id, text=query)
 
 
 def echo(update, context):
