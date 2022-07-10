@@ -232,7 +232,7 @@ def help(update, context):
 
 def startCommand(update: Update, context: CallbackContext):
     buttons = [[InlineKeyboardButton("Список групп", callback_data='groupList')]]
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Привет", reply_markup=ReplyKeyboardMarkup(buttons))
+    context.bot.send_message(chat_id=update.effective_chat.id, text="asdfasdfasdf", reply_markup=ReplyKeyboardMarkup(buttons))
 
 def queryHandler(update: Update, context: CallbackContext):
     query = update.callback_query.data
