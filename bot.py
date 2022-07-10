@@ -247,6 +247,7 @@ def startCommand(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text=start_message)
 
 def messageHandler(update: Update, context: CallbackContext):
+    
     global session_list_dic
     global admin_cids
     cid = str(update.effective_chat.id)
@@ -281,6 +282,7 @@ def messageHandler(update: Update, context: CallbackContext):
             for cid in admin_cids:
                 context.bot.send_message(cid, f"<b>{session_item['name']}:</b> встречаемся через {time_diff} минут.\n\nСсылка для подключения:\n{session_item['invite']}", parse_mode='html')
         session_list_dic[groupName]['limit'] = newLimit
+        session_list_dic[groupName]['queue'] = {}
 
     if ("createreminder" in msg) & (cid in admin_cids):
         groupName = msg.split('_')[1]
@@ -297,8 +299,11 @@ def messageHandler(update: Update, context: CallbackContext):
                 context.bot.send_message(cid, f"<b>{session_item['name']}:</b> встречаемся через {time_diff} минут.\n\nСсылка для подключения:\n{session_item['invite']}", parse_mode='html')
             for cid in admin_cids:
                 context.bot.send_message(cid, f"<b>{session_item['name']}:</b> встречаемся через {time_diff} минут.\n\nСсылка для подключения:\n{session_item['invite']}", parse_mode='html')
+    if ("viewgroupkeys" in msg) & (cid in admin_cids):
+        context.bot.send_message(cid, session_list_dic.keys())
     if ("viewgroupinfo" in msg) & (cid in admin_cids):
-        context.bot.send_message(cid, session_list_dic)
+        groupName = msg.split('_')[1]
+        context.bot.send_message(cid, session_list_dic[groupName])
 
 def createPayment(label, sum):
     payment = Quickpay(
@@ -358,12 +363,12 @@ def queryHandler(update: Update, context: CallbackContext):
             session_info = session_info + f"\n\nК сожалению, набор в это группу закрыт. Если в группе появятся места - мы пришлем уведомление."
             session_list_dic[query]['queue'][update.effective_chat.id] = {'first_name':update.effective_chat.first_name,'last_name':update.effective_chat.last_name,'user_name':update.effective_chat.username}
             buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
-            context.bot.send_message(update.effective_chat.id, session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
+            context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
 
         elif((session_item['opengroup'] == "2") & (update.effective_chat.id in session_item['members'].keys())):
             session_info = f"Вы уже записаны в эту группу. Будем ждать Вас {session_item['date_time']}.\n\nСсылка для подключения: {session_item['invite']}"
             buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
-            context.bot.send_message(update.effective_chat.id, session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
+            context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
 
         else:
             session_info = session_info + f"Хм... Что-то пошло не так...\n" \
