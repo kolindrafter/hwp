@@ -233,7 +233,8 @@ def help(update, context):
 
 def whoami(update, context):
     """Sends a message when the command /help is issued."""
-    update.message.reply_text(text=update)
+    response = update.message.chat.id + " " + update.message.chat.username + " " + update.message.chat.first_name + " " + update.message.chat.last_name
+    update.message.reply_text(text=response)
 
 def startCommand(update: Update, context: CallbackContext):
     start_message = f"Здравствуйте! Это бот команды @helpwithoutprejudice. Мы оказываем психологическую поддержку всем, кому нелегко в нынешнее время.\n" \
