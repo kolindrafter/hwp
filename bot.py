@@ -219,7 +219,7 @@ session_list_dic = {
          'queue':{}}
 }
 
-admin_cids = ['5358195597']
+admin_cids = [5358195597]
 
 # We define command handlers. Error handlers also receive the raised TelegramError object in error.
 def start(update, context):
@@ -260,10 +260,10 @@ def messageHandler(update: Update, context: CallbackContext):
 
     global session_list_dic
     global admin_cids
-    cid = str(update.effective_chat.id)
+    cid = update.effective_chat.id
     msg = update.message.text
 
-    if int(cid) in session_list_dic['crisis']['members']:
+    if cid in session_list_dic['crisis']['members']:
         del session_list_dic['crisis']['members'][cid]
         buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
         context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text="Спасибо. Наш терапевт свяжется с Вами.")
