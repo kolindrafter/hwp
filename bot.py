@@ -246,16 +246,6 @@ def startCommand(update: Update, context: CallbackContext):
     buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
     context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text=start_message)
 
-def createPayment(label, sum):
-    payment = Quickpay(
-            receiver="4100117805460248",
-            quickpay_form="donate",
-            targets="Sponsor this project",
-            paymentType="SB",
-            sum=sum,
-            label=label)
-    return payment
-
 def messageHandler(update: Update, context: CallbackContext):
     global session_list_dic
     global admin_cids
@@ -272,6 +262,33 @@ def messageHandler(update: Update, context: CallbackContext):
                              text=f"У нас есть заявка на кризисную терапию.\n"
                               f"От: {update.effective_chat.first_name} {update.effective_chat.last_name} @{update.effective_chat.username}\n"
                               f"Запрос: {msg}")
+
+    if ("setlimit" in msg) & (cid in admin_cids):
+        groupName = msg.split('_')[1]
+        newLimit = int(msg.split('_')[2])
+        oldLimit = int(session_list_dic[groupName]['limit'])
+        if newLimit > oldLimit:
+            notificationMsg = f"Появились новые места в группу \"{session_list_dic[groupName]['name']}\". " \
+                              f"Вы получили это сообщение, т.к. пытались записаться ранее. " \
+                              f"Чтобы попасть в группу, нажмите на кнопку \"{session_list_dic[groupName]['name']}\", " \
+                              f"Места могут быстро закончиться, если в очереди много участников."
+            buttons=[]
+            for key in session_list_dic.keys():
+                buttons.append([InlineKeyboardButton(session_list_dic[key]['name'], callback_data=key)])
+            buttons.append([InlineKeyboardButton("Поддержать проект", callback_data="just_donation")])
+            for cid in session_list_dic[groupName]['members']:
+                context.bot.send_message(chat_id=cid, text=notificationMsg, parse_mode="html", reply_markup=InlineKeyboardMarkup(buttons))
+        session_list_dic[groupName]['limit'] = newLimit
+
+def createPayment(label, sum):
+    payment = Quickpay(
+            receiver="4100117805460248",
+            quickpay_form="donate",
+            targets="Sponsor this project",
+            paymentType="SB",
+            sum=sum,
+            label=label)
+    return payment
 
 def queryHandler(update: Update, context: CallbackContext):
     query = update.callback_query.data
