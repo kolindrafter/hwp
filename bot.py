@@ -264,7 +264,6 @@ def messageHandler(update: Update, context: CallbackContext):
                               f"Запрос: {msg}")
 
     if ("setlimit" in msg) & (cid in admin_cids):
-        context.bot.send_message(update.effective_chat.id, "asdf")
         groupName = msg.split('_')[1]
         newLimit = int(msg.split('_')[2])
         oldLimit = int(session_list_dic[groupName]['limit'])
@@ -279,10 +278,27 @@ def messageHandler(update: Update, context: CallbackContext):
             buttons.append([InlineKeyboardButton("Поддержать проект", callback_data="just_donation")])
             for cid in session_list_dic[groupName]['members']:
                 context.bot.send_message(chat_id=cid, text=notificationMsg, parse_mode="html", reply_markup=InlineKeyboardMarkup(buttons))
+            for cid in admin_cids:
+                context.bot.send_message(cid, f"<b>{session_item['name']}:</b> встречаемся через {time_diff} минут.\n\nСсылка для подключения:\n{session_item['invite']}", parse_mode='html')
         session_list_dic[groupName]['limit'] = newLimit
 
+    if ("createreminder" in msg) & (cid in admin_cids):
+        groupName = msg.split('_')[1]
+        session_item = session_list_dic[groupName]
+        if (session_item['reminder'] != ""):
+            next_session = session_item['reminder'].split('_')
+            next_seven_days = [datetime.now(pytz.timezone('Europe/Moscow')) + timedelta(days=x) for x in range(7)]
+            reminder_date = [x for x in next_seven_days if str(x.weekday()) == next_session[0]][0]
+            next_session = datetime.strptime(next_session[-1],"%H:%M")
+            reminder_date = reminder_date.replace(hour=next_session.hour, minute=next_session.minute)
+            time_diff = int((reminder_date - datetime.now(pytz.timezone('Europe/Moscow'))).total_seconds() / 60.0)
+
+            for cid in session_item['members'].keys():
+                context.bot.send_message(cid, f"<b>{session_item['name']}:</b> встречаемся через {time_diff} минут.\n\nСсылка для подключения:\n{session_item['invite']}", parse_mode='html')
+            for cid in admin_cids:
+                context.bot.send_message(cid, f"<b>{session_item['name']}:</b> встречаемся через {time_diff} минут.\n\nСсылка для подключения:\n{session_item['invite']}", parse_mode='html')
     if ("viewgroupinfo" in msg) & (cid in admin_cids):
-        context.bot.send_message(cid, "asdf")
+        context.bot.send_message(cid, session_list_dic)
 
 def createPayment(label, sum):
     payment = Quickpay(
