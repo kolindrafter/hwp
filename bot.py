@@ -421,6 +421,7 @@ def start(update: Update, context: CallbackContext):
     buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
     context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text=start_message)
     if not update.effective_chat.id in user_cids.keys():
+        user_cids[update.effective_chat.id] = {}
         user_cids[update.effective_chat.id]['first_name'] = update.effective_chat.first_name
         user_cids[update.effective_chat.id]['last_name'] = update.effective_chat.last_name
         user_cids[update.effective_chat.id]['user_name'] = update.effective_chat.username
@@ -435,7 +436,7 @@ def help(update, context):
 def list(update, context):
     """Sends a message when the command /help is issued."""
     global session_list_dic
-    help_message = f"СПисок групп:"
+    help_message = f"Список групп:"
     buttons=[]
     for key in session_list_dic.keys():
         buttons.append([InlineKeyboardButton(session_list_dic[key]['name'], callback_data=key)])
