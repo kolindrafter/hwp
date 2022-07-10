@@ -409,11 +409,20 @@ session_list_dic_original = {
 }
 
 admin_cids = [5358195597]
+user_cids = {}
+blacklist = {}
 
 # We define command handlers. Error handlers also receive the raised TelegramError object in error.
-def start(update, context):
-    """Sends a message when the command /start is issued."""
-    update.message.reply_text('Hi!')
+def start(update: Update, context: CallbackContext):
+    start_message = f"Здравствуйте! Это бот команды @helpwithoutprejudice. Мы оказываем психологическую поддержку всем, кому нелегко в нынешнее время.\n" \
+                    f"С помощью этого бота Вы сможете посмотреть список групп психологической поддержки, создать напоминание, записаться в группу, отправить донат и запросить краткосрочную терапию с одним из наших терапевтов-волонтеров.\n" \
+                    f"Вот список команд, которые понимает наш бот:\n /start - начать работу с ботом\n /help - посмотреть список команд\n /list - посмотреть список запланированных групп психологической помощи.\n"
+    buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
+    context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text=start_message)
+    if not update.effective_chat.id in user_cids.keys():
+        user_cids[update.effective_chat.id]['first_name'] = update.effective_chat.first_name
+        user_cids[update.effective_chat.id]['last_name'] = update.effective_chat.last_name
+        user_cids[update.effective_chat.id]['user_name'] = update.effective_chat.username
 
 def help(update, context):
     """Sends a message when the command /help is issued."""
@@ -437,13 +446,6 @@ def whoami(update, context):
                str(update.message.chat.first_name) + " " + \
                str(update.message.chat.last_name)
     update.message.reply_text(text=response)
-
-def startCommand(update: Update, context: CallbackContext):
-    start_message = f"Здравствуйте! Это бот команды @helpwithoutprejudice. Мы оказываем психологическую поддержку всем, кому нелегко в нынешнее время.\n" \
-                    f"С помощью этого бота Вы сможете посмотреть список групп психологической поддержки, создать напоминание, записаться в группу, отправить донат и запросить краткосрочную терапию с одним из наших терапевтов-волонтеров.\n" \
-                    f"Вот список команд, которые понимает наш бот:\n /start - начать работу с ботом\n /help - посмотреть список команд\n /list - посмотреть список запланированных групп психологической помощи.\n"
-    buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
-    context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text=start_message)
 
 def messageHandler(update: Update, context: CallbackContext):
 
@@ -498,11 +500,25 @@ def messageHandler(update: Update, context: CallbackContext):
                 context.bot.send_message(cid, f"<b>{session_item['name']}:</b> встречаемся через {time_diff} минут.\n\nСсылка для подключения:\n{session_item['invite']}", parse_mode='html')
             for cid in admin_cids:
                 context.bot.send_message(cid, f"<b>{session_item['name']}:</b> встречаемся через {time_diff} минут.\n\nСсылка для подключения:\n{session_item['invite']}", parse_mode='html')
+
     if ("viewgroupkeys" in msg) & (cid in admin_cids):
         msg = ""
         for key in session_list_dic.keys():
             msg = msg + key + f"\n"
+
+    if ("viewblacklist" in msg) & (cid in admin_cids):
+        msg = ""
+        for key in blacklist.keys():
+            msg = msg + f"{key} / {blacklist[key]['first_name']} / {blacklist[key]['last_name']} / {blacklist[key]['user_name']}\n"
         context.bot.send_message(cid, msg)
+
+    if ("appendblacklist" in msg) & (cid in admin_cids):
+        new_item = msg.split('_')[1]
+        msg = ""
+        for key in blacklist.keys():
+            msg = msg + f"{key} / {blacklist[key]['first_name']} / {blacklist[key]['last_name']} / {blacklist[key]['user_name']}\n"
+        context.bot.send_message(cid, msg)
+
     if ("viewgroupinfo" in msg) & (cid in admin_cids):
         groupList = msg.split('_')
         if len(groupList) == 1:
@@ -517,8 +533,12 @@ def messageHandler(update: Update, context: CallbackContext):
                      f"Invite: {session_item['invite']}\n" \
                      f"Opengroup: {session_item['opengroup']}\n" \
                      f"Limit: {session_item['limit']}\n" \
-                     f"Members: {session_item['members']}\n" \
-                     f"Queue: {session_item['queue']}\n"
+                     f"Members: "
+                for m in session_item['members']:
+                    msg = msg + f"{m} / {session_item['members']['first_name']} / {session_item['members']['last_name']} / {session_item['members']['user_name']}"
+                msg = msg + "\nQueue: "
+                for m in session_item['queue']:
+                    msg = msg + f"{m} / {session_item['queue']['first_name']} / {session_item['queue']['last_name']} / {session_item['queue']['user_name']}"
                 context.bot.send_message(chat_id=cid, text=msg, parse_mode='html')
         else:
             for key in groupList[1:]:
@@ -532,9 +552,19 @@ def messageHandler(update: Update, context: CallbackContext):
                      f"Invite: {session_item['invite']}\n" \
                      f"Opengroup: {session_item['opengroup']}\n" \
                      f"Limit: {session_item['limit']}\n" \
-                     f"Members: {session_item['members']}\n" \
-                     f"Queue: {session_item['queue']}\n"
+                     f"Members: "
+                for m in session_item['members']:
+                    msg = msg + f"{m} / {session_item['members']['first_name']} / {session_item['members']['last_name']} / {session_item['members']['user_name']}"
+                msg = msg + "\nQueue: "
+                for m in session_item['queue']:
+                    msg = msg + f"{m} / {session_item['queue']['first_name']} / {session_item['queue']['last_name']} / {session_item['queue']['user_name']}"
                 context.bot.send_message(chat_id=cid, text=msg, parse_mode='html')
+
+    if ("viewusers" in msg) & (cid in admin_cids):
+        msg = ""
+        for key in user_cids.keys():
+            msg = msg + f"{key} / {user_cids[key]['first_name']} / {user_cids[key]['last_name']} / {user_cids[key]['user_name']}\n"
+        context.bot.send_message(cid, msg)
 
 def createPayment(label, sum):
     payment = Quickpay(
@@ -554,109 +584,110 @@ def queryHandler(update: Update, context: CallbackContext):
     yoomoney_token = "4100117805460248.11EA3C4E3C9C83223569E5AC97BB3021B91BF3223716AF874F39B444D9FC3BD60D5D0EA790F537779AF123D171566090201CCEB73D2B956B925E2E7C95F7CD781C7894BF3C7549CB55D93FCD6E7AEB36F86AFBCE9747845968DB0D6794A548702838EB302925667B83BA85CFBC1F6234EB89C99BECBD15EF60CBB265D7BFFCEB"
     client = Client(yoomoney_token)
 
-    if "groupList" == query:
-        buttons = []
-        for key in session_list_dic.keys():
-            buttons.append([InlineKeyboardButton(session_list_dic[key]['name'], callback_data=key)])
-        buttons.append([InlineKeyboardButton("Поддержать проект", callback_data="just_donation")])
-        context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text="Список групп:")
+    if not update.effective_chat.id in blacklist.keys():
+        if "groupList" == query:
+            buttons = []
+            for key in session_list_dic.keys():
+                buttons.append([InlineKeyboardButton(session_list_dic[key]['name'], callback_data=key)])
+            buttons.append([InlineKeyboardButton("Поддержать проект", callback_data="just_donation")])
+            context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text="Список групп:")
 
-    if query in set(session_list_dic.keys()):
-        session_item = session_list_dic[query]
-        session_info = f"<b>{session_item['name']}</b>\n\n<b>Время</b>: {str(session_item['date_time'])}\n<b>Ведущий терапевт</b>: {session_item['specialist']}\n<b>Аннотация</b>:\n{session_item['description']}"
-        label = str(query)+'_'+str(update.effective_chat.id)
+        if query in set(session_list_dic.keys()):
+            session_item = session_list_dic[query]
+            session_info = f"<b>{session_item['name']}</b>\n\n<b>Время</b>: {str(session_item['date_time'])}\n<b>Ведущий терапевт</b>: {session_item['specialist']}\n<b>Аннотация</b>:\n{session_item['description']}"
+            label = str(query)+'_'+str(update.effective_chat.id)
 
-        if query == "crisis":
-            session_list_dic['crisis']['members'][update.effective_chat.id] = {'chat_id':update.effective_chat.id,'first_name':update.effective_chat.first_name,'last_name':update.effective_chat.last_name,'user_name':update.effective_chat.username, 'date_time': datetime.now()}
-            context.bot.send_message(chat_id=update.effective_chat.id, text="Опишите свою проблему в одном сообщении. Это поможет нам подобрать терапевта для Вас.", parse_mode='html')
+            if query == "crisis":
+                session_list_dic['crisis']['members'][update.effective_chat.id] = {'chat_id':update.effective_chat.id,'first_name':update.effective_chat.first_name,'last_name':update.effective_chat.last_name,'user_name':update.effective_chat.username, 'date_time': datetime.now()}
+                context.bot.send_message(chat_id=update.effective_chat.id, text="Опишите свою проблему в одном сообщении. Это поможет нам подобрать терапевта для Вас.", parse_mode='html')
 
-        elif(session_item['opengroup'] == "1"):
-            session_info = session_info + f"\n\n<b>Ссылка для подключения:</b>\n{session_item['invite']}"
+            elif(session_item['opengroup'] == "1"):
+                session_info = session_info + f"\n\n<b>Ссылка для подключения:</b>\n{session_item['invite']}"
+                buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
+                context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
+
+            elif((session_item['opengroup'] == "2") & (session_item['limit'] > 0) & (not update.effective_chat.id in session_item['members'].keys())):
+                session_info = session_info + f"\n\nЭто <b>закрытая группа</b> с ограниченым количеством участников (осталось <b>{session_item['limit']}</b> мест). Записаться можно отправив любую предложенную сумму в качестве пожертвования.\n\n" \
+                                              f"<b>Инструкция:</b>\n" \
+                                              f"* нажмите на кнопку с суммой, которую хотите пожертвовать, и перейдите по ссылке\n" \
+                                              f"* пожертвование можно внести с помощью карты или ЯндексКошелька\n" \
+                                              f"* <b>важно:</b> после успешного перевода вернитесь в чат бота и нажмите кнопку <b>Подтвердить</b>. Так мы сможем отследить Ваш донат и прислать ссылку для подключения. Обычно это занимает несколько минут\n" \
+                                              f"* если все прошло хорошо, Вы автоматически получите ссылку для подключения через бот. Если Вы не получили ссылку или получили сообщение об ошибке, свяжитесь с @kolin_drafter, мы проверим перевод вручную."
+
+                buttons = [[InlineKeyboardButton("RUB 100", callback_data="rub100", url=createPayment(label,10).redirected_url)],
+                           [InlineKeyboardButton("RUB 500", callback_data="rub500", url=createPayment(label,500).redirected_url)],
+                           [InlineKeyboardButton("RUB 1000", callback_data="rub1000", url=createPayment(label,1000).redirected_url)],
+                           [InlineKeyboardButton("Подтвердить", callback_data="confirmPayment_"+query)],
+                           [InlineKeyboardButton("Список групп", callback_data="groupList")]]
+                context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
+
+            elif((session_item['opengroup'] == "2") & (session_item['limit'] <= 0) & (not update.effective_chat.id in session_item['members'].keys())):
+                session_info = session_info + f"\n\nК сожалению, набор в это группу закрыт. Если в группе появятся места - мы пришлем уведомление."
+                session_list_dic[query]['queue'][update.effective_chat.id] = {'first_name':update.effective_chat.first_name,'last_name':update.effective_chat.last_name,'user_name':update.effective_chat.username}
+                buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
+                context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
+
+            elif((session_item['opengroup'] == "2") & (update.effective_chat.id in session_item['members'].keys())):
+                session_info = f"Вы уже записаны в эту группу. Будем ждать Вас {session_item['date_time']}.\n\nСсылка для подключения: {session_item['invite']}"
+                buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
+                context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
+
+            else:
+                session_info = session_info + f"\n\nХм... Что-то пошло не так...\n" \
+                                              f"Попробуйте еще раз или поищите информацию в @helpwithoutprejudice. Там мы публикуем анонсы всех мероприятий."
+                buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
+                context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
+
+        if "confirmPayment" in query:
+            payment_status = False
+            groupName = query.split('_')[1]
+            session_item = session_list_dic[groupName]
+
+            session_list_dic[groupName]['members'][update.effective_chat.id] = {'first_name':update.effective_chat.first_name,'last_name':update.effective_chat.last_name,'user_name':update.effective_chat.username}
+
+            successful_donate_message = f"Мы получили Ваше пожертвование! Спасибо!\n\nСсылка для подключения к закрытой конференции:\n {session_item['invite']}\n\nБудем ждать Вас {session_item['date_time']}"
+            message_to_admin = f"Пришел донат на запись в группу {session_item['name']}.\nОтправитель: {update.effective_chat.first_name} {update.effective_chat.last_name}, @{update.effective_chat.username}\nИдентификатор платежа: {groupName}_{str(update.effective_chat.id)}"
             buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
-            context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
 
-        elif((session_item['opengroup'] == "2") & (session_item['limit'] > 0) & (not update.effective_chat.id in session_item['members'].keys())):
-            session_info = session_info + f"\n\nЭто <b>закрытая группа</b> с ограниченым количеством участников (осталось <b>{session_item['limit']}</b> мест). Записаться можно отправив любую предложенную сумму в качестве пожертвования.\n\n" \
-                                          f"<b>Инструкция:</b>\n" \
-                                          f"* нажмите на кнопку с суммой, которую хотите пожертвовать, и перейдите по ссылке\n" \
-                                          f"* пожертвование можно внести с помощью карты или ЯндексКошелька\n" \
-                                          f"* <b>важно:</b> после успешного перевода вернитесь в чат бота и нажмите кнопку <b>Подтвердить</b>. Так мы сможем отследить Ваш донат и прислать ссылку для подключения. Обычно это занимает несколько минут\n" \
-                                          f"* если все прошло хорошо, Вы автоматически получите ссылку для подключения через бот. Если Вы не получили ссылку или получили сообщение об ошибке, свяжитесь с @kolin_drafter, мы проверим перевод вручную."
+            groupDate = session_item['reminder']
+            dt_start = datetime.now()
+            utc=pytz.UTC
+            next_session = groupDate.split('_')
+            next_seven_days = [datetime.now(pytz.timezone('Europe/Moscow')) + timedelta(days=x) for x in range(7)]
+            reminder_date = [x for x in next_seven_days if str(x.weekday()) == next_session[0]][0]
+            next_session = datetime.strptime(next_session[-1],"%H:%M")
+            reminder_date = reminder_date.replace(hour=next_session.hour, minute=next_session.minute, tzinfo=utc) - timedelta(days=7)
+
+            while(not payment_status):
+                history = client.operation_history(label=groupName+"_"+str(update.effective_chat.id))
+                # operations = [x for x in history.operations if utc.localize(x.datetime) > reminder_date]
+                operations = history.operations
+                for operation in operations:
+                    if (operation.status == "success"):
+                        context.bot.send_message(chat_id=update.effective_chat.id, text=successful_donate_message, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
+                        payment_status = True
+                    else:
+                        time.sleep(10)
+                if ((datetime.now()-dt_start).total_seconds() > 3):
+                    while (update.effective_chat.id in session_list_dic[groupName]['members'].keys()):
+                        del session_list_dic[groupName]['members'][update.effective_chat.id]
+                    context.bot.send_message(update.effective_chat.id, f"Мы не смогли подтвердить Ваш платеж. Если Вы считаете, что произошла ошибка - свяжитесь с @kolin_drafter", parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
+                    break
+
+            if(payment_status):
+                session_list_dic[groupName]['limit'] -= 1
+                for cid in admin_cids:
+                    context.bot.send_message(chat_id=cid, text=message_to_admin+f"\nВремя платежа: {operation.datetime}\nВ группе осталось <b>{session_list_dic[groupName]['limit']}</b> мест.", parse_mode='html')
+
+        elif query == "just_donation":
+            label = 'justdonate'+'_'+str(update.effective_chat.id)
+            thank_you_message = f"Вы решили поддержать наш проект. Мы благодарны Вам. Выберите сумму, которую Вы хотели бы пожертвовать:"
 
             buttons = [[InlineKeyboardButton("RUB 100", callback_data="rub100", url=createPayment(label,10).redirected_url)],
-                       [InlineKeyboardButton("RUB 500", callback_data="rub500", url=createPayment(label,500).redirected_url)],
-                       [InlineKeyboardButton("RUB 1000", callback_data="rub1000", url=createPayment(label,1000).redirected_url)],
-                       [InlineKeyboardButton("Подтвердить", callback_data="confirmPayment_"+query)],
-                       [InlineKeyboardButton("Список групп", callback_data="groupList")]]
-            context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
-
-        elif((session_item['opengroup'] == "2") & (session_item['limit'] <= 0) & (not update.effective_chat.id in session_item['members'].keys())):
-            session_info = session_info + f"\n\nК сожалению, набор в это группу закрыт. Если в группе появятся места - мы пришлем уведомление."
-            session_list_dic[query]['queue'][update.effective_chat.id] = {'first_name':update.effective_chat.first_name,'last_name':update.effective_chat.last_name,'user_name':update.effective_chat.username}
-            buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
-            context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
-
-        elif((session_item['opengroup'] == "2") & (update.effective_chat.id in session_item['members'].keys())):
-            session_info = f"Вы уже записаны в эту группу. Будем ждать Вас {session_item['date_time']}.\n\nСсылка для подключения: {session_item['invite']}"
-            buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
-            context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
-
-        else:
-            session_info = session_info + f"\n\nХм... Что-то пошло не так...\n" \
-                                          f"Попробуйте еще раз или поищите информацию в @helpwithoutprejudice. Там мы публикуем анонсы всех мероприятий."
-            buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
-            context.bot.send_message(chat_id=update.effective_chat.id, text=session_info, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
-
-    if "confirmPayment" in query:
-        payment_status = False
-        groupName = query.split('_')[1]
-        session_item = session_list_dic[groupName]
-
-        session_list_dic[groupName]['members'][update.effective_chat.id] = {'first_name':update.effective_chat.first_name,'last_name':update.effective_chat.last_name,'user_name':update.effective_chat.username}
-
-        successful_donate_message = f"Мы получили Ваше пожертвование! Спасибо!\n\nСсылка для подключения к закрытой конференции:\n {session_item['invite']}\n\nБудем ждать Вас {session_item['date_time']}"
-        message_to_admin = f"Пришел донат на запись в группу {session_item['name']}.\nОтправитель: {update.effective_chat.first_name} {update.effective_chat.last_name}, @{update.effective_chat.username}\nИдентификатор платежа: {groupName}_{str(update.effective_chat.id)}"
-        buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
-
-        groupDate = session_item['reminder']
-        dt_start = datetime.now()
-        utc=pytz.UTC
-        next_session = groupDate.split('_')
-        next_seven_days = [datetime.now(pytz.timezone('Europe/Moscow')) + timedelta(days=x) for x in range(7)]
-        reminder_date = [x for x in next_seven_days if str(x.weekday()) == next_session[0]][0]
-        next_session = datetime.strptime(next_session[-1],"%H:%M")
-        reminder_date = reminder_date.replace(hour=next_session.hour, minute=next_session.minute, tzinfo=utc) - timedelta(days=7)
-
-        while(not payment_status):
-            history = client.operation_history(label=groupName+"_"+str(update.effective_chat.id))
-            # operations = [x for x in history.operations if utc.localize(x.datetime) > reminder_date]
-            operations = history.operations
-            for operation in operations:
-                if (operation.status == "success"):
-                    context.bot.send_message(chat_id=update.effective_chat.id, text=successful_donate_message, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
-                    payment_status = True
-                else:
-                    time.sleep(10)
-            if ((datetime.now()-dt_start).total_seconds() > 3):
-                while (update.effective_chat.id in session_list_dic[groupName]['members'].keys()):
-                    del session_list_dic[groupName]['members'][update.effective_chat.id]
-                context.bot.send_message(update.effective_chat.id, f"Мы не смогли подтвердить Ваш платеж. Если Вы считаете, что произошла ошибка - свяжитесь с @kolin_drafter", parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
-                break
-
-        if(payment_status):
-            session_list_dic[groupName]['limit'] -= 1
-            for cid in admin_cids:
-                context.bot.send_message(chat_id=cid, text=message_to_admin+f"\nВремя платежа: {operation.datetime}\nВ группе осталось <b>{session_list_dic[groupName]['limit']}</b> мест.", parse_mode='html')
-
-    elif query == "just_donation":
-        label = 'justdonate'+'_'+str(update.effective_chat.id)
-        thank_you_message = f"Вы решили поддержать наш проект. Мы благодарны Вам. Выберите сумму, которую Вы хотели бы пожертвовать:"
-
-        buttons = [[InlineKeyboardButton("RUB 100", callback_data="rub100", url=createPayment(label,10).redirected_url)],
-                       [InlineKeyboardButton("RUB 500", callback_data="rub500", url=createPayment(label,500).redirected_url)],
-                       [InlineKeyboardButton("RUB 1000", callback_data="rub1000", url=createPayment(label,1000).redirected_url)],
-                       [InlineKeyboardButton("Список групп", callback_data="groupList")]]
-        context.bot.send_message(chat_id=update.effective_chat.id, text=thank_you_message, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
+                           [InlineKeyboardButton("RUB 500", callback_data="rub500", url=createPayment(label,500).redirected_url)],
+                           [InlineKeyboardButton("RUB 1000", callback_data="rub1000", url=createPayment(label,1000).redirected_url)],
+                           [InlineKeyboardButton("Список групп", callback_data="groupList")]]
+            context.bot.send_message(chat_id=update.effective_chat.id, text=thank_you_message, parse_mode='html', reply_markup=InlineKeyboardMarkup(buttons))
 
 def echo(update, context):
     """Echos the user message."""
@@ -681,8 +712,9 @@ def main():
     dp = updater.dispatcher
 
     # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler("start", startCommand))
+    dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(CommandHandler("list", list))
     dp.add_handler(CommandHandler("whoami", whoami))
     dp.add_handler(CallbackQueryHandler(queryHandler))
     dp.add_handler(MessageHandler(Filters.text, messageHandler))
