@@ -517,7 +517,7 @@ def messageHandler(update: Update, context: CallbackContext):
                  f"Limit: {session_item['limit']}\n" \
                  f"Members: {session_item['members']}\n" \
                  f"Queue: {session_item['queue']}\n"
-            context.bot.send_message(cid, session_list_dic[groupName])
+            context.bot.send_message(cid, msg)
 
 def createPayment(label, sum):
     payment = Quickpay(
