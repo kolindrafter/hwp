@@ -249,7 +249,7 @@ def startCommand(update: Update, context: CallbackContext):
 def messageHandler(update: Update, context: CallbackContext):
     global session_list_dic
     global admin_cids
-    cid = update.effective_chat.id
+    cid = str(update.effective_chat.id)
     msg = update.message.text
 
     if cid in session_list_dic['crisis']['members']:
@@ -264,13 +264,14 @@ def messageHandler(update: Update, context: CallbackContext):
                               f"Запрос: {msg}")
 
     if ("setlimit" in msg) & (cid in admin_cids):
+        context.bot.send_message(update.effective_chat.id, "asdf")
         groupName = msg.split('_')[1]
         newLimit = int(msg.split('_')[2])
         oldLimit = int(session_list_dic[groupName]['limit'])
         if newLimit > oldLimit:
             notificationMsg = f"Появились новые места в группу \"{session_list_dic[groupName]['name']}\". " \
                               f"Вы получили это сообщение, т.к. пытались записаться ранее. " \
-                              f"Чтобы попасть в группу, нажмите на кнопку \"{session_list_dic[groupName]['name']}\", " \
+                              f"Чтобы попасть в группу, выберите группу из списка ниже. " \
                               f"Места могут быстро закончиться, если в очереди много участников."
             buttons=[]
             for key in session_list_dic.keys():
@@ -279,6 +280,9 @@ def messageHandler(update: Update, context: CallbackContext):
             for cid in session_list_dic[groupName]['members']:
                 context.bot.send_message(chat_id=cid, text=notificationMsg, parse_mode="html", reply_markup=InlineKeyboardMarkup(buttons))
         session_list_dic[groupName]['limit'] = newLimit
+
+    if ("viewgroupinfo" in msg) & (cid in admin_cids):
+        context.bot.send_message(cid, "asdf")
 
 def createPayment(label, sum):
     payment = Quickpay(
