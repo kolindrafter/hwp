@@ -414,13 +414,13 @@ blacklist = {}
 
 # We define command handlers. Error handlers also receive the raised TelegramError object in error.
 def start(update: Update, context: CallbackContext):
+    global user_cids
     start_message = f"Здравствуйте! Это бот команды @helpwithoutprejudice. Мы оказываем психологическую поддержку всем, кому нелегко в нынешнее время.\n" \
                     f"С помощью этого бота Вы сможете посмотреть список групп психологической поддержки, создать напоминание, записаться в группу, отправить донат и запросить краткосрочную терапию с одним из наших терапевтов-волонтеров.\n" \
                     f"Вот список команд, которые понимает наш бот:\n /start - начать работу с ботом\n /help - посмотреть список команд\n /list - посмотреть список запланированных групп психологической помощи.\n"
     buttons = [[InlineKeyboardButton("Список групп", callback_data="groupList")]]
     context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons), text=start_message)
     if not update.effective_chat.id in user_cids.keys():
-        context.bot.send_message(chat_id=update.effective_chat.id, text="asdf")
         user_cids[update.effective_chat.id]['first_name'] = update.effective_chat.first_name
         user_cids[update.effective_chat.id]['last_name'] = update.effective_chat.last_name
         user_cids[update.effective_chat.id]['user_name'] = update.effective_chat.username
@@ -452,6 +452,8 @@ def messageHandler(update: Update, context: CallbackContext):
 
     global session_list_dic
     global admin_cids
+    global user_cids
+    global blacklist
     cid = update.effective_chat.id
     msg = update.message.text
 
@@ -581,6 +583,8 @@ def queryHandler(update: Update, context: CallbackContext):
     query = update.callback_query.data
     update.callback_query.answer()
     global session_list_dic
+    global user_cids
+    global blacklist
 
     yoomoney_token = "4100117805460248.11EA3C4E3C9C83223569E5AC97BB3021B91BF3223716AF874F39B444D9FC3BD60D5D0EA790F537779AF123D171566090201CCEB73D2B956B925E2E7C95F7CD781C7894BF3C7549CB55D93FCD6E7AEB36F86AFBCE9747845968DB0D6794A548702838EB302925667B83BA85CFBC1F6234EB89C99BECBD15EF60CBB265D7BFFCEB"
     client = Client(yoomoney_token)
@@ -727,7 +731,6 @@ def main():
     dp.add_error_handler(error)
     updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=TOKEN, webhook_url=APP_NAME + TOKEN)
     updater.idle()
-
 
 if __name__ == '__main__':
     main()
